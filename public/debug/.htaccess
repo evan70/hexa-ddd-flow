@@ -1,0 +1,15 @@
+# Zabezpečenie adresára debug
+# V produkcii by mal byť tento adresár nedostupný alebo chránený heslom
+
+# Povolenie prístupu len z lokálnej siete (odkomentujte v produkcii)
+# Order deny,allow
+# Deny from all
+# Allow from 127.0.0.1
+# Allow from ::1
+# Allow from 192.168.
+
+# Alternatívne môžete použiť Basic Auth (odkomentujte v produkcii)
+# AuthType Basic
+# AuthName "Debug Area"
+# AuthUserFile /cesta/k/.htpasswd
+# Require valid-user
