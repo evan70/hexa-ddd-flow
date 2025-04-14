@@ -1,0 +1,40 @@
+# Composer
+/vendor/
+composer.lock
+
+# Node.js
+/node_modules/
+package-lock.json
+npm-debug.log
+yarn-error.log
+
+# Vite
+/public/build/
+
+# SQLite
+/data/*.sqlite
+
+# Cache
+/var/cache/
+
+# IDE
+/.idea/
+/.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+/logs/
+*.log
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# PHPUnit
+/phpunit.xml
+/.phpunit.result.cache
+/coverage/

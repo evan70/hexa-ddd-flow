@@ -1,0 +1,126 @@
+@import "tailwindcss";
+
+/* Custom styles */
+@layer base {
+    /* Light mode variables */
+    :root {
+        --color-primary: #3b82f6;
+        --color-primary-dark: #2563eb;
+        --color-secondary: #64748b;
+        --color-secondary-dark: #475569;
+        --color-background: #ffffff;
+        --color-surface: #f8fafc;
+        --color-text: #1e293b;
+        --color-text-light: #64748b;
+        --color-border: #e2e8f0;
+    }
+    
+    /* Dark mode variables */
+    .dark {
+        --color-primary: #3b82f6;
+        --color-primary-dark: #60a5fa;
+        --color-secondary: #94a3b8;
+        --color-secondary-dark: #cbd5e1;
+        --color-background: #0f172a;
+        --color-surface: #1e293b;
+        --color-text: #f8fafc;
+        --color-text-light: #cbd5e1;
+        --color-border: #334155;
+    }
+    
+    /* Base styles */
+    body {
+        background-color: var(--color-background);
+        color: var(--color-text);
+        transition-property: color, background-color, border-color;
+        transition-duration: 200ms;
+    }
+}
+
+@layer components {
+    /* Container */
+    .container {
+        @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8;
+    }
+    
+    /* Buttons */
+    .btn {
+        @apply inline-flex items-center justify-center px-4 py-2 border border-transparent 
+               rounded-md shadow-sm text-sm font-medium focus:outline-none focus:ring-2 
+               focus:ring-offset-2;
+        transition-property: color, background-color, border-color;
+        transition-duration: 200ms;
+    }
+    
+    .btn-primary {
+        background-color: var(--color-primary);
+        color: white;
+    }
+    
+    .btn-primary:hover {
+        background-color: var(--color-primary-dark);
+    }
+    
+    .btn-secondary {
+        background-color: var(--color-secondary);
+        color: white;
+    }
+    
+    .btn-secondary:hover {
+        background-color: var(--color-secondary-dark);
+    }
+    
+    /* Cards */
+    .card {
+        background-color: var(--color-surface);
+        border: 1px solid var(--color-border);
+        @apply rounded-lg shadow-sm overflow-hidden;
+        transition-property: color, background-color, border-color;
+        transition-duration: 200ms;
+    }
+    
+    .card-header {
+        @apply px-6 py-4;
+        border-bottom: 1px solid var(--color-border);
+    }
+    
+    .card-body {
+        @apply px-6 py-4;
+    }
+    
+    .card-footer {
+        @apply px-6 py-4;
+        border-top: 1px solid var(--color-border);
+        background-color: var(--color-background);
+    }
+    
+    /* Dark mode toggle */
+    .dark-mode-toggle {
+        @apply relative inline-flex flex-shrink-0 h-6 w-11 border-2 border-transparent rounded-full 
+               cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-2;
+        background-color: #e5e7eb;
+        transition-property: color, background-color, border-color;
+        transition-duration: 200ms;
+    }
+    
+    .dark .dark-mode-toggle {
+        background-color: #4b5563;
+    }
+    
+    .dark-mode-toggle-dot {
+        @apply pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow transform ring-0;
+        transition-property: transform;
+        transition-duration: 200ms;
+        transform: translateX(0);
+    }
+    
+    .dark .dark-mode-toggle-dot {
+        transform: translateX(100%);
+    }
+}
+
+/* Transitions */
+.transition-theme {
+    transition-property: color, background-color, border-color;
+    transition-duration: 200ms;
+}

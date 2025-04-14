@@ -1,0 +1,48 @@
+{
+    "name": "slim4/hexagonal-architecture",
+    "description": "Hexagonal architecture with Slim 4, SQLite, Twig, Ramsey UUID, TailwindCSS and GSAP",
+    "type": "project",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "App\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
+        }
+    },
+    "require": {
+        "php": "^8.3",
+        "slim/slim": "^4.11",
+        "slim/psr7": "^1.6",
+        "slim/twig-view": "^3.3",
+        "php-di/php-di": "^7.0",
+        "ramsey/uuid": "^4.7"
+    },
+    "require-dev": {
+        "phpstan/phpstan": "^2.1",
+        "phpunit/phpunit": "^10.0",
+        "squizlabs/php_codesniffer": "^3.7"
+    },
+    "scripts": {
+        "start": "php -S localhost:8080 -t public",
+        "init-db": "./bin/init-db.sh",
+        "dev": "./dev.sh",
+        "build": "pnpm build",
+        "watch": "pnpm watch",
+        "test": "phpunit",
+        "phpstan": "phpstan analyse src --level=5",
+        "cs": "phpcs --standard=PSR12 src",
+        "cs-fix": "phpcbf --standard=PSR12 src",
+        "post-create-project-cmd": [
+            "@php -r \"file_exists('.env') || copy('.env.example', '.env');\"",
+            "@init-db"
+        ]
+    },
+    "config": {
+        "process-timeout": 0,
+        "sort-packages": true
+    }
+}

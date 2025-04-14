@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Slim 4 Hexagonal App{% endblock %}</title>
+
+    {# Vite CSS #}
+    <link rel="stylesheet" href="/build/assets/app-BBwJYtSL.css">
+
+    {# Preload fonty #}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Merriweather:wght@400;700&display=swap" rel="stylesheet">
+
+    {# Prevent flash of unstyled content for dark mode #}
+    <script>
+        // Check for saved theme preference or use the system preference
+        if (localStorage.getItem('darkMode') === 'true' ||
+            (localStorage.getItem('darkMode') === null &&
+             window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        }
+    </script>
+</head>
+<body class="bg-background font-sans transition-theme">
+    <header class="bg-surface shadow-sm transition-theme">
+        <div class="container mx-auto px-4 py-4">
+            <nav class="flex items-center justify-between">
+                <a href="/" class="text-xl font-bold text-primary">Slim 4 App</a>
+
+                <div class="flex items-center space-x-6">
+                    <div class="flex space-x-4">
+                        <a href="/" class="text-text-light hover:text-primary transition-theme">Domov</a>
+                        <a href="/web/view/articles" class="text-text-light hover:text-primary transition-theme">Články</a>
+                        <a href="/mark/view/users" class="text-text-light hover:text-primary transition-theme">Používatelia</a>
+                    </div>
+
+                    {# Dark Mode Toggle #}
+                    <button
+                        id="darkModeToggle"
+                        type="button"
+                        class="dark-mode-toggle"
+                        role="switch"
+                        aria-checked="false"
+                        aria-label="Prepnúť tmavý režim"
+                    >
+                        <span class="dark-mode-toggle-dot">
+                            <span class="sr-only">Prepnúť tmavý režim</span>
+                            <svg id="darkIcon" class="h-3 w-3 text-amber-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
+                            </svg>
+                            <svg id="lightIcon" class="h-3 w-3 text-amber-500 hidden" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd" />
+                            </svg>
+                        </span>
+                    </button>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-8">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="bg-gray-800 text-white py-8 transition-theme">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row justify-between">
+                <div class="mb-4 md:mb-0">
+                    <h3 class="text-lg font-bold mb-2">Slim 4 Hexagonal App</h3>
+                    <p class="text-gray-400">Ukážková aplikácia s hexagonálnou architektúrou</p>
+                </div>
+
+                <div>
+                    <h4 class="text-lg font-bold mb-2">Odkazy</h4>
+                    <ul class="space-y-1">
+                        <li><a href="/" class="text-gray-400 hover:text-white transition-theme">Domov</a></li>
+                        <li><a href="/web/view/articles" class="text-gray-400 hover:text-white transition-theme">Články</a></li>
+                        <li><a href="/mark/view/users" class="text-gray-400 hover:text-white transition-theme">Používatelia</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="mt-8 pt-8 border-t border-gray-700 text-center text-gray-400">
+                <p>&copy; {{ "now"|date("Y") }} Slim 4 Hexagonal App. Všetky práva vyhradené.</p>
+            </div>
+        </div>
+    </footer>
+
+    {# Vite JS #}
+    <script type="module" src="/build/assets/app-F1B1iBRr.js"></script>
+</body>
+</html>

@@ -1,0 +1,194 @@
+{% extends "layout.twig" %}
+
+{% block title %}Domovská stránka{% endblock %}
+
+{% block content %}
+{# Hero sekcia s obrázkom na pozadí #}
+<div class="relative bg-gray-900 overflow-hidden mb-12">
+    <div class="absolute inset-0">
+        <img src="{{ vite.image('hero-bg.jpg') }}" alt="Hero background" class="w-full h-full object-cover opacity-50">
+        <div class="absolute inset-0 bg-gradient-to-r from-gray-900 to-transparent"></div>
+    </div>
+    <div class="relative max-w-7xl mx-auto py-24 px-4 sm:py-32 sm:px-6 lg:px-8">
+        <h1 class="text-4xl font-extrabold tracking-tight text-white sm:text-5xl lg:text-6xl">Slim 4 Hexagonal App</h1>
+        <p class="mt-6 text-xl text-gray-300 max-w-3xl">
+            Moderná aplikácia s hexagonálnou architektúrou, TailwindCSS a GSAP animáciami.
+            Teraz s podporou tmavého režimu!
+        </p>
+        <div class="mt-10 flex space-x-4">
+            <a href="/web/view/articles" class="btn btn-primary">Prehliadať články</a>
+            <a href="/mark/view/users" class="btn btn-secondary">Zobraziť používateľov</a>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="mb-8 fade-in">
+        <h2 class="text-3xl font-bold mb-2">Hlavné funkcie</h2>
+        <p class="text-gray-600 dark:text-gray-400">Objavte výhody našej aplikácie</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+        <div class="card slide-in-left">
+            <div class="card-header">
+                <h2 class="text-xl font-semibold">Hexagonálna architektúra</h2>
+            </div>
+            <div class="card-body">
+                <p class="text-gray-600 dark:text-gray-400 mb-4">
+                    Aplikácia implementuje hexagonálnu architektúru (ports and adapters) pre oddelenie biznis logiky od infraštruktúry.
+                </p>
+                <ul class="list-disc list-inside text-gray-600 dark:text-gray-400 space-y-1">
+                    <li>Doménová logika v centre</li>
+                    <li>Porty definujú rozhrania</li>
+                    <li>Adaptéry implementujú porty</li>
+                </ul>
+            </div>
+            <div class="card-footer">
+                <a href="https://en.wikipedia.org/wiki/Hexagonal_architecture_(software)" class="text-primary hover:text-primary-dark transition-theme" target="_blank">Viac informácií</a>
+            </div>
+        </div>
+
+        <div class="card slide-up">
+            <div class="card-header">
+                <h2 class="text-xl font-semibold">TailwindCSS</h2>
+            </div>
+            <div class="card-body">
+                <p class="text-gray-600 dark:text-gray-400 mb-4">
+                    Aplikácia používa TailwindCSS pre moderný a responzívny dizajn s podporou tmavého režimu.
+                </p>
+                <ul class="list-disc list-inside text-gray-600 dark:text-gray-400 space-y-1">
+                    <li>Utility-first prístup</li>
+                    <li>Responzívny dizajn</li>
+                    <li>Tmavý režim</li>
+                </ul>
+            </div>
+            <div class="card-footer">
+                <a href="https://tailwindcss.com/" class="text-primary hover:text-primary-dark transition-theme" target="_blank">Viac informácií</a>
+            </div>
+        </div>
+
+        <div class="card slide-in-right">
+            <div class="card-header">
+                <h2 class="text-xl font-semibold">GSAP Animácie</h2>
+            </div>
+            <div class="card-body">
+                <p class="text-gray-600 dark:text-gray-400 mb-4">
+                    Aplikácia používa GSAP pre plynulé a profesionálne animácie.
+                </p>
+                <ul class="list-disc list-inside text-gray-600 dark:text-gray-400 space-y-1">
+                    <li>Fade In animácie</li>
+                    <li>Slide Up animácie</li>
+                    <li>Slide In animácie</li>
+                </ul>
+            </div>
+            <div class="card-footer">
+                <a href="https://greensock.com/gsap/" class="text-primary hover:text-primary-dark transition-theme" target="_blank">Viac informácií</a>
+            </div>
+        </div>
+    </div>
+
+    {# Dokumentačná sekcia s obrázkom #}
+    <div class="mb-12 slide-up">
+        <div class="bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden shadow-lg">
+            <div class="md:flex">
+                <div class="md:flex-shrink-0">
+                    <img class="h-full w-full object-cover md:w-48" src="{{ vite.image('docs-hero.jpg') }}" alt="Dokumentácia">
+                </div>
+                <div class="p-8">
+                    <h2 class="text-2xl font-bold mb-2">Tmavý režim</h2>
+                    <p class="text-gray-600 dark:text-gray-400 mb-4">
+                        Aplikácia podporuje tmavý režim, ktorý môžete prepnúť pomocou prepínača v pravom hornom rohu.
+                        Tmavý režim je príjemnejší pre oči v noci a šetrí batériu na OLED displejoch.
+                    </p>
+                    <div class="flex space-x-4 mt-6">
+                        <button class="btn btn-primary">Primárne tlačidlo</button>
+                        <button class="btn btn-secondary">Sekundárne tlačidlo</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# Referencie s obrázkami #}
+    <div class="mb-12">
+        <h2 class="text-2xl font-bold mb-6">Čo hovoria naši používatelia</h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="card slide-in-left">
+                <div class="p-6">
+                    <div class="flex items-center mb-4">
+                        <img class="h-12 w-12 rounded-full object-cover mr-4" src="{{ vite.image('testimonial-1.jpg') }}" alt="Používateľ 1">
+                        <div>
+                            <h3 class="font-semibold">Ján Novák</h3>
+                            <p class="text-gray-600 dark:text-gray-400 text-sm">Vývojár</p>
+                        </div>
+                    </div>
+                    <p class="text-gray-600 dark:text-gray-400">
+                        "Hexagonálna architektúra mi umožnila ľahko testovať a rozširovať aplikáciu. Odporúčam!"
+                    </p>
+                </div>
+            </div>
+
+            <div class="card slide-up">
+                <div class="p-6">
+                    <div class="flex items-center mb-4">
+                        <img class="h-12 w-12 rounded-full object-cover mr-4" src="{{ vite.image('testimonial-2.jpg') }}" alt="Používateľ 2">
+                        <div>
+                            <h3 class="font-semibold">Mária Kováčová</h3>
+                            <p class="text-gray-600 dark:text-gray-400 text-sm">Dizajnérka</p>
+                        </div>
+                    </div>
+                    <p class="text-gray-600 dark:text-gray-400">
+                        "TailwindCSS a tmavý režim sú skvelé! Aplikácia vyzerá profesionálne a je príjemná na používanie."
+                    </p>
+                </div>
+            </div>
+
+            <div class="card slide-in-right">
+                <div class="p-6">
+                    <div class="flex items-center mb-4">
+                        <img class="h-12 w-12 rounded-full object-cover mr-4" src="{{ vite.image('testimonial-3.jpg') }}" alt="Používateľ 3">
+                        <div>
+                            <h3 class="font-semibold">Peter Horváth</h3>
+                            <p class="text-gray-600 dark:text-gray-400 text-sm">Produktový manažér</p>
+                        </div>
+                    </div>
+                    <p class="text-gray-600 dark:text-gray-400">
+                        "GSAP animácie dodávajú aplikácii profesionálny vzhľad. Naši klienti sú nadšení!"
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+        <div class="card slide-in-left">
+            <div class="card-header">
+                <h2 class="text-xl font-semibold">Zoznam článkov</h2>
+            </div>
+            <div class="card-body">
+                <p class="text-gray-600 dark:text-gray-400 mb-4">
+                    Prezrite si zoznam všetkých článkov v systéme.
+                </p>
+            </div>
+            <div class="card-footer">
+                <a href="/web/view/articles" class="btn btn-primary">Zobraziť články</a>
+            </div>
+        </div>
+
+        <div class="card slide-in-right">
+            <div class="card-header">
+                <h2 class="text-xl font-semibold">Zoznam používateľov</h2>
+            </div>
+            <div class="card-body">
+                <p class="text-gray-600 dark:text-gray-400 mb-4">
+                    Prezrite si zoznam všetkých používateľov v systéme.
+                </p>
+            </div>
+            <div class="card-footer">
+                <a href="/mark/view/users" class="btn btn-primary">Zobraziť používateľov</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
