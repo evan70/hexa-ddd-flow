@@ -31,7 +31,13 @@ Oba archívy obsahujú všetky potrebné súbory pre nasadenie na shared hosting
 
 ## Produkčné nastavenia
 
-Skripty automaticky nastavia nasledujúce produkčné nastavenia:
+Skripty automaticky vykonajú nasledujúce kroky pred nasadením:
+
+1. **Kontrola kódu pomocou PHPStan**
+   - Spustenie statickej analýzy kódu na úrovni 5
+   - Ak PHPStan nájde chyby, skript sa ukončí s chybou
+
+Potom nastavia nasledujúce produkčné nastavenia:
 
 1. **Optimalizácia závislostí**
    - Inštalácia len produkčných závislostí (`--no-dev`)

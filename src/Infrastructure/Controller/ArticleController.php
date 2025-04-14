@@ -126,13 +126,16 @@ class ArticleController extends AbstractController
         // UUID validácia je vykonávaná v middleware
 
         try {
+            // Toto môže vyhodiť \InvalidArgumentException alebo \RuntimeException
             $id = $this->articleService->createArticle($data);
         } catch (\InvalidArgumentException $e) {
+            // Chyba validácie
             $response->getBody()->write(json_encode([
                 'error' => $e->getMessage()
             ]));
             return $response->withHeader('Content-Type', 'application/json')->withStatus(400);
-        } catch (\Exception $e) {
+        } catch (\RuntimeException $e) {
+            // Chyba pri ukladaní do databázy
             $response->getBody()->write(json_encode([
                 'error' => 'Chyba pri ukladaní článku: ' . $e->getMessage()
             ]));
@@ -295,26 +298,22 @@ class ArticleController extends AbstractController
         $slug = $args['slug'];
         $type = $args['type'];
 
-        try {
-            // Kontrola, či je typ platný
-            if (!Article::isValidType($type)) {
-                throw new HttpNotFoundException($request, "Typ článku '{$type}' nebol nájdený");
-            }
-
-            // Získanie článku podľa slugu
-            $article = $this->articleService->getArticleBySlug($slug, $request);
-
-            // Kontrola, či článok má správny typ
-            if ($article['type'] !== $type) {
-                throw new HttpNotFoundException($request, "Typ článku '{$type}' nebol nájdený");
-            }
-
-            return $this->render($response, 'articles/detail.twig', [
-                'article' => $article
-            ]);
-        } catch (HttpNotFoundException $e) {
-            throw $e;
+        // Kontrola, či je typ platný
+        if (!Article::isValidType($type)) {
+            throw new HttpNotFoundException($request, "Typ článku '{$type}' nebol nájdený");
         }
+
+        // Získanie článku podľa slugu
+        $article = $this->articleService->getArticleBySlug($slug, $request);
+
+        // Kontrola, či článok má správny typ
+        if ($article['type'] !== $type) {
+            throw new HttpNotFoundException($request, "Typ článku '{$type}' nebol nájdený");
+        }
+
+        return $this->render($response, 'articles/detail.twig', [
+            'article' => $article
+        ]);
     }
 
     /**

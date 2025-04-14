@@ -37,6 +37,16 @@ if [ ! -f "composer.json" ]; then
     error "Skript musí byť spustený z koreňového adresára projektu"
 fi
 
+# Spustenie PHPStan pre kontrolu kódu
+log "Spustenie PHPStan pre kontrolu kódu..."
+composer phpstan
+
+# Ak PHPStan zlyhal, ukončíme skript
+if [ $? -ne 0 ]; then
+    error "PHPStan našiel chyby v kóde. Opravte ich pred nasadením na produkciu."
+    exit 1
+fi
+
 # Vytvorenie adresára pre build
 log "Vytváram adresár pre build..."
 BUILD_DIR="build_shared_hosting"

@@ -84,4 +84,12 @@ interface ArticleRepositoryInterface
      * @return array List of all tags
      */
     public function getAllTags(): array;
+
+    /**
+     * Find an article by slug
+     *
+     * @param string $slug
+     * @return array|null Article data or null if not found
+     */
+    public function findBySlug(string $slug): ?array;
 }

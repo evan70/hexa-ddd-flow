@@ -246,9 +246,9 @@ return function (ContainerBuilder $containerBuilder) {
         AuthMiddleware::class => function (ContainerInterface $c) {
             return new AuthMiddleware(
                 $c->get(AuthService::class),
+                $c->get(Twig::class),
                 ['admin'], // Len používatelia s rolou admin majú prístup k MarkCMS
-                '/login',
-                $c->get(Twig::class)
+                '/login'
             );
         },
 

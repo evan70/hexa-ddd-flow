@@ -231,6 +231,26 @@ class ApiArticleRepository implements ArticleRepositoryInterface
     }
 
     /**
+     * Find an article by slug
+     *
+     * @param string $slug
+     * @return array|null Article data or null if not found
+     */
+    public function findBySlug(string $slug): ?array
+    {
+        $response = $this->makeApiRequest('GET', '/articles', [
+            'slug' => $slug
+        ]);
+
+        if (isset($response['error']) || empty($response)) {
+            return null;
+        }
+
+        // API vráti zoznam článkov, ale my potrebujeme len jeden
+        return $response[0] ?? null;
+    }
+
+    /**
      * Make an API request
      *
      * @param string $method HTTP method

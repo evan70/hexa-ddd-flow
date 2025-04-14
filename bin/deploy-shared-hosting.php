@@ -12,6 +12,19 @@ if (!file_exists('composer.json')) {
     exit(1);
 }
 
+// Spustenie PHPStan pre kontrolu kódu
+echo "INFO: Spustenie PHPStan pre kontrolu kódu...\n";
+$output = [];
+$returnVar = 0;
+exec('composer phpstan', $output, $returnVar);
+
+// Ak PHPStan zlyhal, ukončíme skript
+if ($returnVar !== 0) {
+    echo "ERROR: PHPStan našiel chyby v kóde. Opravte ich pred nasadením na produkciu.\n";
+    echo implode("\n", $output) . "\n";
+    exit(1);
+}
+
 // Vytvorenie adresára pre build
 echo "INFO: Vytváram adresár pre build...\n";
 $buildDir = "build_shared_hosting";

@@ -143,6 +143,7 @@ class ArticleService
      * @param array $articleData Dáta článku
      * @return string ID vytvoreného článku
      * @throws \InvalidArgumentException Ak sú dáta neplatné
+     * @throws \RuntimeException Ak nastane chyba pri ukladaní do databázy
      */
     public function createArticle(array $articleData): string
     {
@@ -154,8 +155,13 @@ class ArticleService
             $articleData['categories'] = json_encode($articleData['categories']);
         }
 
-        // Uloženie článku
-        return $this->articleRepository->save($articleData);
+        try {
+            // Uloženie článku
+            return $this->articleRepository->save($articleData);
+        } catch (\RuntimeException $e) {
+            // Zachytíme a prepošleme výnimku
+            throw $e;
+        }
     }
 
     /**
