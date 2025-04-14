@@ -32,9 +32,12 @@
                 <div class="flex items-center space-x-6">
                     <div class="flex space-x-4">
                         <a href="/" class="text-text-light hover:text-primary transition-theme">Domov</a>
-                        <a href="/mark/articles" class="text-text-light hover:text-primary transition-theme">Články</a>
-                        <a href="/mark/users" class="text-text-light hover:text-primary transition-theme">Používatelia</a>
-                        <a href="/mark/settings" class="text-text-light hover:text-primary transition-theme">Nastavenia</a>
+                        {% if auth.check() and auth.hasRoleCheck('admin') %}
+                            <a href="/mark" class="text-text-light hover:text-primary transition-theme">Dashboard</a>
+                            <a href="/mark/articles" class="text-text-light hover:text-primary transition-theme">Články</a>
+                            <a href="/mark/users" class="text-text-light hover:text-primary transition-theme">Používatelia</a>
+                            <a href="/mark/settings" class="text-text-light hover:text-primary transition-theme">Nastavenia</a>
+                        {% endif %}
                     </div>
 
                     <div class="flex space-x-4">

@@ -243,7 +243,7 @@ return function (ContainerBuilder $containerBuilder) {
         AuthMiddleware::class => function (ContainerInterface $c) {
             return new AuthMiddleware(
                 $c->get(AuthService::class),
-                [],
+                ['admin'], // Len používatelia s rolou admin majú prístup k MarkCMS
                 '/login'
             );
         },

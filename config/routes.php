@@ -80,7 +80,7 @@ return function (App $app) {
         $group->get('/view/tag/{tag}', [ArticleController::class, 'viewByTag']);
     });
 
-    // Mark CMS routy
+    // Mark CMS routy (chránené autentifikáciou)
     $app->group('/mark', function (RouteCollectorProxy $group) {
         // Dashboard
         $group->get('', [MarkController::class, 'dashboard']);
@@ -117,5 +117,5 @@ return function (App $app) {
             ->add(UuidValidatorMiddleware::class);
         $group->delete('/api/articles/{id}', [ArticleController::class, 'delete'])
             ->add(UuidValidatorMiddleware::class);
-    });
+    })->add(AuthMiddleware::class);
 };

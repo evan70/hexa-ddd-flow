@@ -48,13 +48,14 @@ class AuthMiddleware implements MiddlewareInterface
             // Používateľ nie je prihlásený, presmerujeme ho na prihlasovaciu stránku
             $routeContext = RouteContext::fromRequest($request);
             $routeParser = $routeContext->getRouteParser();
-            
+
             $redirectUrl = $this->redirectUrl;
             if (strpos($redirectUrl, '/') !== 0) {
                 $redirectUrl = $routeParser->urlFor($redirectUrl);
             }
-            
-            return $handler->handle($request)
+
+            $response = new \Slim\Psr7\Response();
+            return $response
                 ->withHeader('Location', $redirectUrl)
                 ->withStatus(302);
         }
@@ -64,13 +65,14 @@ class AuthMiddleware implements MiddlewareInterface
             // Používateľ nemá požadovanú rolu, presmerujeme ho na prihlasovaciu stránku
             $routeContext = RouteContext::fromRequest($request);
             $routeParser = $routeContext->getRouteParser();
-            
+
             $redirectUrl = $this->redirectUrl;
             if (strpos($redirectUrl, '/') !== 0) {
                 $redirectUrl = $routeParser->urlFor($redirectUrl);
             }
-            
-            return $handler->handle($request)
+
+            $response = new \Slim\Psr7\Response();
+            return $response
                 ->withHeader('Location', $redirectUrl)
                 ->withStatus(302);
         }
