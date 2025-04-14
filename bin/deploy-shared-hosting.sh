@@ -241,11 +241,15 @@ EOL
 
 # Vytvorenie ZIP archívu pre Windows používateľov
 log "Vytváram ZIP archív..."
-zip -r "${BUILD_DIR}.zip" $BUILD_DIR > /dev/null
+cd $BUILD_DIR
+zip -r "../${BUILD_DIR}.zip" . > /dev/null
+cd ..
 
 # Vytvorenie TAR.GZ archívu pre Linux používateľov (zachováva oprávnenia)
 log "Vytváram TAR.GZ archív..."
-tar -czf "${BUILD_DIR}.tar.gz" $BUILD_DIR > /dev/null
+cd $BUILD_DIR
+tar -czf "../${BUILD_DIR}.tar.gz" . > /dev/null
+cd ..
 
 # Vyčistenie
 log "Čistím..."

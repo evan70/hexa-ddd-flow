@@ -256,8 +256,24 @@ file_put_contents($buildDir . '/README_DEPLOY.txt', $readme);
 echo "INFO: Vytváram ZIP archív...\n";
 $zip = new ZipArchive();
 if ($zip->open($buildDir . '.zip', ZipArchive::CREATE | ZipArchive::OVERWRITE) === TRUE) {
-    addDirToZip($zip, $buildDir, $buildDir);
+    // Prejdeme do adresára build_shared_hosting a pridáme všetky súbory priamo (bez adresára build_shared_hosting)
+    $currentDir = getcwd();
+    chdir($buildDir);
+    $files = new RecursiveIteratorIterator(
+        new RecursiveDirectoryIterator('.'),
+        RecursiveIteratorIterator::LEAVES_ONLY
+    );
+
+    foreach ($files as $name => $file) {
+        if (!$file->isDir()) {
+            $filePath = $file->getRealPath();
+            $relativePath = substr($filePath, 2); // Odstránime './' zo začiatku cesty
+            $zip->addFile($filePath, $relativePath);
+        }
+    }
+
     $zip->close();
+    chdir($currentDir);
     echo "SUCCESS: ZIP archív bol úspešne vytvorený: {$buildDir}.zip\n";
 } else {
     echo "ERROR: Nepodarilo sa vytvoriť ZIP archív\n";
