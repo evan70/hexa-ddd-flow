@@ -8,6 +8,7 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use App\Application\Service\ArticleService;
 use App\Domain\Article;
+use App\Domain\Article as ArticleType;
 use Slim\Exception\HttpNotFoundException;
 use Slim\Views\Twig;
 
@@ -103,13 +104,17 @@ class ArticleController extends AbstractController
             return $response->withStatus(400);
         }
 
-        if (!ArticleType::isValid($data['type'])) {
+        if (!ArticleType::isValidType($data['type'])) {
             return $response->withStatus(400);
         }
 
         // UUID validácia je vykonávaná v middleware
 
-        $id = $this->articleRepository->save($data);
+        try {
+            $id = $this->articleService->createArticle($data);
+        } catch (\InvalidArgumentException $e) {
+            return $response->withStatus(400);
+        }
 
         $response->getBody()->write(json_encode(['id' => $id]));
         return $response->withHeader('Content-Type', 'application/json')->withStatus(201);
@@ -132,20 +137,24 @@ class ArticleController extends AbstractController
         $data = $request->getParsedBody();
         $data['id'] = $id;
 
-        $article = $this->articleRepository->findById($id);
-
-        if (!$article) {
-            throw new HttpNotFoundException($request, "Article not found");
+        try {
+            $article = $this->articleService->getArticleById($id, $request);
+        } catch (HttpNotFoundException $e) {
+            throw $e;
         }
 
         // Validácia typu, ak je poskytnutý
-        if (isset($data['type']) && !ArticleType::isValid($data['type'])) {
+        if (isset($data['type']) && !ArticleType::isValidType($data['type'])) {
             return $response->withStatus(400);
         }
 
         // UUID validácia je vykonávaná v middleware
 
-        $id = $this->articleRepository->save($data);
+        try {
+            $id = $this->articleService->updateArticle($id, $data, $request);
+        } catch (\InvalidArgumentException $e) {
+            return $response->withStatus(400);
+        }
 
         $response->getBody()->write(json_encode(['id' => $id]));
         return $response->withHeader('Content-Type', 'application/json');
@@ -165,10 +174,10 @@ class ArticleController extends AbstractController
 
         // UUID validácia je vykonávaná v middleware
 
-        $success = $this->articleRepository->delete($id);
-
-        if (!$success) {
-            throw new HttpNotFoundException($request, "Article not found");
+        try {
+            $success = $this->articleService->deleteArticle($id, $request);
+        } catch (HttpNotFoundException $e) {
+            throw $e;
         }
 
         return $response->withStatus(204);
