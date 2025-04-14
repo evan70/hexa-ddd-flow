@@ -65,25 +65,14 @@ else
     info "Spustite 'composer cs-fix' pre automatickú opravu"
 fi
 
-# Spustenie unit testov
-header "UNIT TESTY"
-composer test:unit
+# Spustenie všetkých testov s podrobným výpisom
+header "TESTY"
+composer test:verbose
 
 if [ $? -eq 0 ]; then
-    success "Unit testy: Všetky testy prešli"
+    success "Testy: Všetky testy prešli"
 else
-    error "Unit testy: Niektoré testy zlyhali"
-    exit 1
-fi
-
-# Spustenie integračných testov
-header "INTEGRAČNÉ TESTY"
-composer test:integration
-
-if [ $? -eq 0 ]; then
-    success "Integračné testy: Všetky testy prešli"
-else
-    error "Integračné testy: Niektoré testy zlyhali"
+    error "Testy: Niektoré testy zlyhali"
     exit 1
 fi
 
@@ -91,8 +80,7 @@ fi
 header "SÚHRN TESTOV"
 success "Statická analýza kódu: OK"
 success "Kontrola štýlu kódu: OK"
-success "Unit testy: OK"
-success "Integračné testy: OK"
+success "Testy: OK"
 
 echo -e "\n${GREEN}╔════════════════════════════════════════════════════════════════╗${NC}"
 echo -e "${GREEN}║                     VŠETKY TESTY PREŠLI                         ║${NC}"

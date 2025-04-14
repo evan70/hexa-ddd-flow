@@ -43,9 +43,8 @@ V projekte sú k dispozícii nasledujúce príkazy pre spúšťanie testov:
   Tento príkaz spustí:
   - Statickú analýzu kódu (PHPStan)
   - Kontrolu štýlu kódu (PHP_CodeSniffer)
-  - Unit testy
-  - Integračné testy
-  
+  - Všetky testy s podrobným výpisom
+
   Výsledky budú zobrazené s farebnými ikonami (✓, ✗, ⚠) a prehľadným súhrnom.
 
 - **Statická analýza kódu**:
@@ -82,7 +81,7 @@ Pri spustení príkazu `composer test:all` uvidíte podobný výstup:
 
 ✓ PHP_CodeSniffer: Kód spĺňa štandardy PSR-12
 
-=== UNIT TESTY ===
+=== TESTY ===
 
 PHPUnit 10.5.0 by Sebastian Bergmann and contributors.
 
@@ -91,33 +90,22 @@ App\Domain\Article
  ✓ Validate article data
  ✓ Get article by id
 
-Time: 00:00.123, Memory: 10.00 MB
-
-OK (3 tests, 5 assertions)
-
-✓ Unit testy: Všetky testy prešli
-
-=== INTEGRAČNÉ TESTY ===
-
-PHPUnit 10.5.0 by Sebastian Bergmann and contributors.
-
 App\Infrastructure\Persistence\DatabaseArticleRepository
  ✓ Save article
  ✓ Find article by id
  ✓ Find article by slug
 
-Time: 00:00.456, Memory: 12.00 MB
+Time: 00:00.579, Memory: 12.00 MB
 
-OK (3 tests, 6 assertions)
+OK (6 tests, 11 assertions)
 
-✓ Integračné testy: Všetky testy prešli
+✓ Testy: Všetky testy prešli
 
 === SÚHRN TESTOV ===
 
 ✓ Statická analýza kódu: OK
 ✓ Kontrola štýlu kódu: OK
-✓ Unit testy: OK
-✓ Integračné testy: OK
+✓ Testy: OK
 
 ╔════════════════════════════════════════════════════════════════╗
 ║                     VŠETKY TESTY PREŠLI                         ║
@@ -145,7 +133,7 @@ class ArticleTest extends TestCase
     public function testCreateArticle(): void
     {
         $article = new Article('Test Title', 'Test Content');
-        
+
         $this->assertEquals('Test Title', $article->getTitle());
         $this->assertEquals('Test Content', $article->getContent());
     }
@@ -170,19 +158,19 @@ use PHPUnit\Framework\TestCase;
 class DatabaseArticleRepositoryTest extends TestCase
 {
     private DatabaseArticleRepository $repository;
-    
+
     protected function setUp(): void
     {
         $this->repository = new DatabaseArticleRepository(/* ... */);
     }
-    
+
     public function testSaveAndFindArticle(): void
     {
         $article = new Article('Test Title', 'Test Content');
-        
+
         $id = $this->repository->save($article);
         $foundArticle = $this->repository->findById($id);
-        
+
         $this->assertEquals('Test Title', $foundArticle->getTitle());
         $this->assertEquals('Test Content', $foundArticle->getContent());
     }
