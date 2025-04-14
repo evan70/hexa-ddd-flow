@@ -65,7 +65,7 @@ class AuthService
 
         // V demo implementácii akceptujeme akékoľvek heslo
         // V reálnej aplikácii by sme tu mali použiť password_verify()
-        
+
         // Vytvorenie session
         $sessionId = $this->sessionRepository->create(
             $user['id'],
@@ -100,7 +100,7 @@ class AuthService
         }
 
         $sessionId = $_COOKIE[$this->cookieName];
-        
+
         // Vymazanie cookie
         setcookie(
             $this->cookieName,
@@ -126,12 +126,33 @@ class AuthService
     public function getCurrentUser(Request $request): ?array
     {
         $cookies = $request->getCookieParams();
-        
+
         if (!isset($cookies[$this->cookieName])) {
             return null;
         }
 
         $sessionId = $cookies[$this->cookieName];
+        $session = $this->sessionRepository->get($sessionId);
+
+        if (!$session || !isset($session['data']['user'])) {
+            return null;
+        }
+
+        return $session['data']['user'];
+    }
+
+    /**
+     * Získa aktuálne prihláseného používateľa (pre použitie v šablónach)
+     *
+     * @return array|null Dáta používateľa alebo null, ak používateľ nie je prihlásený
+     */
+    public function getUser(): ?array
+    {
+        if (!isset($_COOKIE[$this->cookieName])) {
+            return null;
+        }
+
+        $sessionId = $_COOKIE[$this->cookieName];
         $session = $this->sessionRepository->get($sessionId);
 
         if (!$session || !isset($session['data']['user'])) {
@@ -153,6 +174,16 @@ class AuthService
     }
 
     /**
+     * Overí, či je používateľ prihlásený (pre použitie v šablónach)
+     *
+     * @return bool True, ak je používateľ prihlásený
+     */
+    public function check(): bool
+    {
+        return $this->getUser() !== null;
+    }
+
+    /**
      * Overí, či má používateľ požadovanú rolu
      *
      * @param Request $request
@@ -171,6 +202,23 @@ class AuthService
     }
 
     /**
+     * Overí, či má používateľ požadovanú rolu (pre použitie v šablónach)
+     *
+     * @param string $role Požadovaná rola
+     * @return bool True, ak má používateľ požadovanú rolu
+     */
+    public function hasRoleCheck(string $role): bool
+    {
+        $user = $this->getUser();
+
+        if (!$user) {
+            return false;
+        }
+
+        return $user['role'] === $role;
+    }
+
+    /**
      * Overí, či má používateľ aspoň jednu z požadovaných rolí
      *
      * @param Request $request
@@ -180,6 +228,23 @@ class AuthService
     public function hasAnyRole(Request $request, array $roles): bool
     {
         $user = $this->getCurrentUser($request);
+
+        if (!$user) {
+            return false;
+        }
+
+        return in_array($user['role'], $roles);
+    }
+
+    /**
+     * Overí, či má používateľ aspoň jednu z požadovaných rolí (pre použitie v šablónach)
+     *
+     * @param array $roles Požadované role
+     * @return bool True, ak má používateľ aspoň jednu z požadovaných rolí
+     */
+    public function hasAnyRoleCheck(array $roles): bool
+    {
+        $user = $this->getUser();
 
         if (!$user) {
             return false;

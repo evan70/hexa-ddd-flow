@@ -39,8 +39,8 @@
                     </div>
 
                     <div class="flex space-x-4">
-                        {% if auth.isLoggedIn() %}
-                            <span class="text-text-light">{{ auth.user.username }}</span>
+                        {% if auth.check() %}
+                            <span class="text-text-light">{{ auth.getUser().username }}</span>
                             <a href="/logout" class="text-text-light hover:text-primary transition-theme">Odhlásiť sa</a>
                         {% else %}
                             <a href="/login" class="text-text-light hover:text-primary transition-theme">Prihlásiť sa</a>
