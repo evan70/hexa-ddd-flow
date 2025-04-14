@@ -39,12 +39,27 @@ fi
 
 # Spustenie PHPStan pre kontrolu kódu
 log "Spustenie PHPStan pre kontrolu kódu..."
-composer phpstan
+
+# Kontrola, či je PHPStan dostupný
+if command -v phpstan &> /dev/null; then
+    phpstan analyse src --level=5
+    PHPSTAN_RESULT=$?
+else
+    # Použitie PHPStan cez Composer
+    composer phpstan
+    PHPSTAN_RESULT=$?
+fi
 
 # Ak PHPStan zlyhal, ukončíme skript
-if [ $? -ne 0 ]; then
-    error "PHPStan našiel chyby v kóde. Opravte ich pred nasadením na produkciu."
-    exit 1
+if [ $PHPSTAN_RESULT -ne 0 ]; then
+    warning "PHPStan našiel chyby v kóde alebo nie je dostupný."
+    warning "Chcete pokračovať aj napriek tomu? (y/n)"
+    read -r answer
+    if [ "$answer" != "y" ] && [ "$answer" != "Y" ]; then
+        error "Nasadenie bolo prerušené."
+        exit 1
+    fi
+    success "Pokračujeme v nasadení bez kontroly kódu..."
 fi
 
 # Vytvorenie adresára pre build

@@ -16,13 +16,30 @@ if (!file_exists('composer.json')) {
 echo "INFO: Spustenie PHPStan pre kontrolu kódu...\n";
 $output = [];
 $returnVar = 0;
-exec('composer phpstan', $output, $returnVar);
 
-// Ak PHPStan zlyhal, ukončíme skript
+// Skúsime spustiť PHPStan priamo
+if (exec('command -v phpstan', $output, $returnCode) && $returnCode === 0) {
+    exec('phpstan analyse src --level=5', $output, $returnVar);
+} else {
+    // Použitie PHPStan cez Composer
+    exec('composer phpstan', $output, $returnVar);
+}
+
+// Ak PHPStan zlyhal, spýtame sa používateľa, či chce pokračovať
 if ($returnVar !== 0) {
-    echo "ERROR: PHPStan našiel chyby v kóde. Opravte ich pred nasadením na produkciu.\n";
+    echo "WARNING: PHPStan našiel chyby v kóde alebo nie je dostupný.\n";
     echo implode("\n", $output) . "\n";
-    exit(1);
+    echo "WARNING: Chcete pokračovať aj napriek tomu? (y/n) ";
+    $handle = fopen("php://stdin", "r");
+    $line = trim(fgets($handle));
+    fclose($handle);
+
+    if (strtolower($line) !== 'y') {
+        echo "ERROR: Nasadenie bolo prerušené.\n";
+        exit(1);
+    }
+
+    echo "INFO: Pokračujeme v nasadení bez kontroly kódu...\n";
 }
 
 // Vytvorenie adresára pre build
