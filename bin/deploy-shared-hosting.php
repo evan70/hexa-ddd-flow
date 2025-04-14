@@ -33,12 +33,12 @@ if ($returnVar !== 0) {
     $handle = fopen("php://stdin", "r");
     $line = trim(fgets($handle));
     fclose($handle);
-
+    
     if (strtolower($line) !== 'y') {
         echo "ERROR: Nasadenie bolo prerušené.\n";
         exit(1);
     }
-
+    
     echo "INFO: Pokračujeme v nasadení bez kontroly kódu...\n";
 }
 
@@ -170,6 +170,61 @@ $indexContent = <<<'EOL'
 
 declare(strict_types=1);
 
+// Zapnutie zobrazenia chýb pre debugovanie (odkomentujte v prípade problémov)
+// ini_set('display_errors', '1');
+// ini_set('display_startup_errors', '1');
+// error_reporting(E_ALL);
+
+// Pokus o načítanie SharedHostingBootstrap triedy
+try {
+    // Skúsime nájsť SharedHostingBootstrap.php na rôznych cestách
+    $bootstrapPaths = [
+        __DIR__ . '/../src/SharedHostingBootstrap.php',
+        __DIR__ . '/../../src/SharedHostingBootstrap.php',
+        __DIR__ . '/../../../src/SharedHostingBootstrap.php',
+        __DIR__ . '/src/SharedHostingBootstrap.php',
+        __DIR__ . '/../app/src/SharedHostingBootstrap.php',
+    ];
+    
+    $bootstrapPath = null;
+    foreach ($bootstrapPaths as $path) {
+        if (file_exists($path)) {
+            $bootstrapPath = $path;
+            break;
+        }
+    }
+    
+    if ($bootstrapPath) {
+        // Načítame SharedHostingBootstrap.php
+        require_once $bootstrapPath;
+        
+        // Použijeme SharedHostingBootstrap na nájdenie autoloadera
+        $autoloadPath = \App\SharedHostingBootstrap::findAutoloader();
+        if ($autoloadPath) {
+            require $autoloadPath;
+            
+            // Použijeme SharedHostingBootstrap na nájdenie boot súboru
+            $bootPath = \App\SharedHostingBootstrap::findBootFile();
+            if ($bootPath) {
+                // Načítanie a spustenie aplikácie z boot/app.php
+                $app = require $bootPath;
+                
+                // Spustenie aplikácie
+                $app->run();
+                exit;
+            } else {
+                throw new \Exception('Boot file not found');
+            }
+        } else {
+            throw new \Exception('Autoloader not found');
+        }
+    }
+} catch (\Exception $e) {
+    // Ak SharedHostingBootstrap zlyhalo, použijeme záložný spôsob
+}
+
+// Záložný spôsob - priama detekcia ciest
+
 // Detekcia cesty k vendor adresáru
 $vendorPaths = [
     __DIR__ . '/../vendor/autoload.php',           // Štandardná cesta
@@ -177,6 +232,9 @@ $vendorPaths = [
     __DIR__ . '/../../../vendor/autoload.php',      // O dve úrovne vyššie
     __DIR__ . '/vendor/autoload.php',               // V public adresári
     __DIR__ . '/../app/vendor/autoload.php',        // V app adresári
+    dirname($_SERVER['DOCUMENT_ROOT']) . '/vendor/autoload.php', // Vedľa document root
+    $_SERVER['DOCUMENT_ROOT'] . '/../vendor/autoload.php',      // Vedľa document root (alternatívna cesta)
+    $_SERVER['DOCUMENT_ROOT'] . '/vendor/autoload.php',         // V document root
 ];
 
 $autoloadPath = null;
@@ -201,6 +259,9 @@ $bootPaths = [
     __DIR__ . '/../../../boot/app.php',      // O dve úrovne vyššie
     __DIR__ . '/boot/app.php',               // V public adresári
     __DIR__ . '/../app/boot/app.php',        // V app adresári
+    dirname($_SERVER['DOCUMENT_ROOT']) . '/boot/app.php', // Vedľa document root
+    $_SERVER['DOCUMENT_ROOT'] . '/../boot/app.php',      // Vedľa document root (alternatívna cesta)
+    $_SERVER['DOCUMENT_ROOT'] . '/boot/app.php',         // V document root
 ];
 
 $bootPath = null;
@@ -263,7 +324,7 @@ if ($zip->open($buildDir . '.zip', ZipArchive::CREATE | ZipArchive::OVERWRITE) =
         new RecursiveDirectoryIterator('.'),
         RecursiveIteratorIterator::LEAVES_ONLY
     );
-
+    
     foreach ($files as $name => $file) {
         if (!$file->isDir()) {
             $filePath = $file->getRealPath();
@@ -271,7 +332,7 @@ if ($zip->open($buildDir . '.zip', ZipArchive::CREATE | ZipArchive::OVERWRITE) =
             $zip->addFile($filePath, $relativePath);
         }
     }
-
+    
     $zip->close();
     chdir($currentDir);
     echo "SUCCESS: ZIP archív bol úspešne vytvorený: {$buildDir}.zip\n";

@@ -159,6 +159,61 @@ cat > $BUILD_DIR/public/index.php << 'EOL'
 
 declare(strict_types=1);
 
+// Zapnutie zobrazenia chýb pre debugovanie (odkomentujte v prípade problémov)
+// ini_set('display_errors', '1');
+// ini_set('display_startup_errors', '1');
+// error_reporting(E_ALL);
+
+// Pokus o načítanie SharedHostingBootstrap triedy
+try {
+    // Skúsime nájsť SharedHostingBootstrap.php na rôznych cestách
+    $bootstrapPaths = [
+        __DIR__ . '/../src/SharedHostingBootstrap.php',
+        __DIR__ . '/../../src/SharedHostingBootstrap.php',
+        __DIR__ . '/../../../src/SharedHostingBootstrap.php',
+        __DIR__ . '/src/SharedHostingBootstrap.php',
+        __DIR__ . '/../app/src/SharedHostingBootstrap.php',
+    ];
+
+    $bootstrapPath = null;
+    foreach ($bootstrapPaths as $path) {
+        if (file_exists($path)) {
+            $bootstrapPath = $path;
+            break;
+        }
+    }
+
+    if ($bootstrapPath) {
+        // Načítame SharedHostingBootstrap.php
+        require_once $bootstrapPath;
+
+        // Použijeme SharedHostingBootstrap na nájdenie autoloadera
+        $autoloadPath = \App\SharedHostingBootstrap::findAutoloader();
+        if ($autoloadPath) {
+            require $autoloadPath;
+
+            // Použijeme SharedHostingBootstrap na nájdenie boot súboru
+            $bootPath = \App\SharedHostingBootstrap::findBootFile();
+            if ($bootPath) {
+                // Načítanie a spustenie aplikácie z boot/app.php
+                $app = require $bootPath;
+
+                // Spustenie aplikácie
+                $app->run();
+                exit;
+            } else {
+                throw new \Exception('Boot file not found');
+            }
+        } else {
+            throw new \Exception('Autoloader not found');
+        }
+    }
+} catch (\Exception $e) {
+    // Ak SharedHostingBootstrap zlyhalo, použijeme záložný spôsob
+}
+
+// Záložný spôsob - priama detekcia ciest
+
 // Detekcia cesty k vendor adresáru
 $vendorPaths = [
     __DIR__ . '/../vendor/autoload.php',           // Štandardná cesta
@@ -166,6 +221,9 @@ $vendorPaths = [
     __DIR__ . '/../../../vendor/autoload.php',      // O dve úrovne vyššie
     __DIR__ . '/vendor/autoload.php',               // V public adresári
     __DIR__ . '/../app/vendor/autoload.php',        // V app adresári
+    dirname($_SERVER['DOCUMENT_ROOT']) . '/vendor/autoload.php', // Vedľa document root
+    $_SERVER['DOCUMENT_ROOT'] . '/../vendor/autoload.php',      // Vedľa document root (alternatívna cesta)
+    $_SERVER['DOCUMENT_ROOT'] . '/vendor/autoload.php',         // V document root
 ];
 
 $autoloadPath = null;
@@ -190,6 +248,9 @@ $bootPaths = [
     __DIR__ . '/../../../boot/app.php',      // O dve úrovne vyššie
     __DIR__ . '/boot/app.php',               // V public adresári
     __DIR__ . '/../app/boot/app.php',        // V app adresári
+    dirname($_SERVER['DOCUMENT_ROOT']) . '/boot/app.php', // Vedľa document root
+    $_SERVER['DOCUMENT_ROOT'] . '/../boot/app.php',      // Vedľa document root (alternatívna cesta)
+    $_SERVER['DOCUMENT_ROOT'] . '/boot/app.php',         // V document root
 ];
 
 $bootPath = null;
