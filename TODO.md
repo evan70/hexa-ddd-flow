@@ -1,17 +1,17 @@
 # TODO: Ďalšie kroky pre rozvoj aplikácie
 
 ## 1. Dokončenie implementácie služieb
-- [ ] Dokončiť `ArticleService`:
-  - [ ] Pridať metódy pre vytváranie článkov (`createArticle`)
-  - [ ] Pridať metódy pre aktualizáciu článkov (`updateArticle`)
-  - [ ] Pridať metódy pre mazanie článkov (`deleteArticle`)
-  - [ ] Implementovať validáciu vstupných dát
+- [x] Dokončiť `ArticleService`:
+  - [x] Pridať metódy pre vytváranie článkov (`createArticle`)
+  - [x] Pridať metódy pre aktualizáciu článkov (`updateArticle`)
+  - [x] Pridať metódy pre mazanie článkov (`deleteArticle`)
+  - [x] Implementovať validáciu vstupných dát
 
-- [ ] Dokončiť `UserService`:
-  - [ ] Pridať metódy pre vytváranie používateľov (`createUser`)
-  - [ ] Pridať metódy pre aktualizáciu používateľov (`updateUser`)
-  - [ ] Pridať metódy pre mazanie používateľov (`deleteUser`)
-  - [ ] Implementovať validáciu vstupných dát
+- [x] Dokončiť `UserService`:
+  - [x] Pridať metódy pre vytváranie používateľov (`createUser`)
+  - [x] Pridať metódy pre aktualizáciu používateľov (`updateUser`)
+  - [x] Pridať metódy pre mazanie používateľov (`deleteUser`)
+  - [x] Implementovať validáciu vstupných dát
 
 ## 2. Implementácia autentifikácie a autorizácie
 - [ ] Vytvoriť `AuthService` pre správu autentifikácie

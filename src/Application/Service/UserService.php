@@ -64,4 +64,98 @@ class UserService
     {
         return $this->userRepository->findByRole($role);
     }
+
+    /**
+     * Vytvorí nového používateľa
+     *
+     * @param array $userData Dáta používateľa
+     * @return string ID vytvoreného používateľa
+     * @throws \InvalidArgumentException Ak sú dáta neplatné
+     */
+    public function createUser(array $userData): string
+    {
+        // Validácia povinných polí
+        $this->validateUserData($userData);
+
+        // Uloženie používateľa
+        return $this->userRepository->save($userData);
+    }
+
+    /**
+     * Aktualizuje existujúceho používateľa
+     *
+     * @param string $id ID používateľa
+     * @param array $userData Dáta používateľa
+     * @param Request $request
+     * @return string ID aktualizovaného používateľa
+     * @throws HttpNotFoundException Ak používateľ neexistuje
+     * @throws \InvalidArgumentException Ak sú dáta neplatné
+     */
+    public function updateUser(string $id, array $userData, Request $request): string
+    {
+        // Kontrola, či používateľ existuje
+        $existingUser = $this->userRepository->findById($id);
+        if (!$existingUser) {
+            throw new HttpNotFoundException($request, "User not found");
+        }
+
+        // Pridanie ID do dát
+        $userData['id'] = $id;
+
+        // Validácia dát
+        $this->validateUserData($userData, false);
+
+        // Aktualizovanie používateľa
+        return $this->userRepository->save($userData);
+    }
+
+    /**
+     * Vymaže používateľa
+     *
+     * @param string $id ID používateľa
+     * @param Request $request
+     * @return bool Úspech operácie
+     * @throws HttpNotFoundException Ak používateľ neexistuje
+     */
+    public function deleteUser(string $id, Request $request): bool
+    {
+        // Kontrola, či používateľ existuje
+        $existingUser = $this->userRepository->findById($id);
+        if (!$existingUser) {
+            throw new HttpNotFoundException($request, "User not found");
+        }
+
+        // Vymazanie používateľa
+        return $this->userRepository->delete($id);
+    }
+
+    /**
+     * Validuje dáta používateľa
+     *
+     * @param array $userData Dáta používateľa
+     * @param bool $isNew Či ide o nového používateľa (true) alebo aktualizáciu (false)
+     * @throws \InvalidArgumentException Ak sú dáta neplatné
+     */
+    private function validateUserData(array $userData, bool $isNew = true): void
+    {
+        // Kontrola povinných polí pre nového používateľa
+        if ($isNew) {
+            $requiredFields = ['username', 'email', 'role'];
+            foreach ($requiredFields as $field) {
+                if (!isset($userData[$field]) || empty($userData[$field])) {
+                    throw new \InvalidArgumentException("Chýba povinné pole: {$field}");
+                }
+            }
+        }
+
+        // Kontrola emailu, ak je zadaný
+        if (isset($userData['email']) && !filter_var($userData['email'], FILTER_VALIDATE_EMAIL)) {
+            throw new \InvalidArgumentException("Neplatný email: {$userData['email']}");
+        }
+
+        // Kontrola role, ak je zadaná
+        if (isset($userData['role']) && !\App\Domain\User::isValid($userData['role'])) {
+            throw new \InvalidArgumentException("Neplatná rola: {$userData['role']}");
+        }
+    }
 }

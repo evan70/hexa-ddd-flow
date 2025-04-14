@@ -119,6 +119,80 @@ class ArticleService
     }
 
     /**
+     * Vytvorí nový článok
+     *
+     * @param array $articleData Dáta článku
+     * @return string ID vytvoreného článku
+     * @throws \InvalidArgumentException Ak sú dáta neplatné
+     */
+    public function createArticle(array $articleData): string
+    {
+        // Validácia povinných polí
+        $this->validateArticleData($articleData);
+
+        // Konverzia kategórií na JSON, ak existujú
+        if (isset($articleData['categories']) && is_array($articleData['categories'])) {
+            $articleData['categories'] = json_encode($articleData['categories']);
+        }
+
+        // Uloženie článku
+        return $this->articleRepository->save($articleData);
+    }
+
+    /**
+     * Aktualizuje existujúci článok
+     *
+     * @param string $id ID článku
+     * @param array $articleData Dáta článku
+     * @param Request $request
+     * @return string ID aktualizovaného článku
+     * @throws HttpNotFoundException Ak článok neexistuje
+     * @throws \InvalidArgumentException Ak sú dáta neplatné
+     */
+    public function updateArticle(string $id, array $articleData, Request $request): string
+    {
+        // Kontrola, či článok existuje
+        $existingArticle = $this->articleRepository->findById($id);
+        if (!$existingArticle) {
+            throw new HttpNotFoundException($request, "Article not found");
+        }
+
+        // Pridanie ID do dát
+        $articleData['id'] = $id;
+
+        // Validácia dát
+        $this->validateArticleData($articleData, false);
+
+        // Konverzia kategórií na JSON, ak existujú
+        if (isset($articleData['categories']) && is_array($articleData['categories'])) {
+            $articleData['categories'] = json_encode($articleData['categories']);
+        }
+
+        // Aktualizovanie článku
+        return $this->articleRepository->save($articleData);
+    }
+
+    /**
+     * Vymaže článok
+     *
+     * @param string $id ID článku
+     * @param Request $request
+     * @return bool Úspech operácie
+     * @throws HttpNotFoundException Ak článok neexistuje
+     */
+    public function deleteArticle(string $id, Request $request): bool
+    {
+        // Kontrola, či článok existuje
+        $existingArticle = $this->articleRepository->findById($id);
+        if (!$existingArticle) {
+            throw new HttpNotFoundException($request, "Article not found");
+        }
+
+        // Vymazanie článku
+        return $this->articleRepository->delete($id);
+    }
+
+    /**
      * Dekóduje JSON kategórie pre každý článok v zozname
      *
      * @param array $articles Zoznam článkov
@@ -133,7 +207,47 @@ class ArticleService
                 $article['categories'] = [];
             }
         }
-        
+
         return $articles;
+    }
+
+    /**
+     * Validuje dáta článku
+     *
+     * @param array $articleData Dáta článku
+     * @param bool $isNew Či ide o nový článok (true) alebo aktualizáciu (false)
+     * @throws \InvalidArgumentException Ak sú dáta neplatné
+     */
+    private function validateArticleData(array $articleData, bool $isNew = true): void
+    {
+        // Kontrola povinných polí pre nový článok
+        if ($isNew) {
+            $requiredFields = ['title', 'content', 'type', 'author_id'];
+            foreach ($requiredFields as $field) {
+                if (!isset($articleData[$field]) || empty($articleData[$field])) {
+                    throw new \InvalidArgumentException("Chýba povinné pole: {$field}");
+                }
+            }
+        }
+
+        // Kontrola typu článku, ak je zadaný
+        if (isset($articleData['type']) && !Article::isValidType($articleData['type'])) {
+            throw new \InvalidArgumentException("Neplatný typ článku: {$articleData['type']}");
+        }
+
+        // Kontrola kategórií, ak sú zadané
+        if (isset($articleData['categories'])) {
+            if (!is_array($articleData['categories']) && !is_string($articleData['categories'])) {
+                throw new \InvalidArgumentException("Kategórie musia byť pole alebo JSON reťazec");
+            }
+
+            // Ak je to reťazec, skúsime ho dekódovať ako JSON
+            if (is_string($articleData['categories'])) {
+                $decoded = json_decode($articleData['categories'], true);
+                if (json_last_error() !== JSON_ERROR_NONE) {
+                    throw new \InvalidArgumentException("Neplatný JSON formát pre kategórie");
+                }
+            }
+        }
     }
 }
