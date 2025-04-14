@@ -23,7 +23,7 @@
         "start": "php -S localhost:8080 -t public",
         "init-db": "./bin/init-db.sh",
         "dev": "./dev.sh",
-        "build": "pnpm build",
+        "build": "pnpm build && php bin/copy-images.php",
         "watch": "pnpm watch",
         "test": "phpunit",
         "test:verbose": "phpunit --testdox --colors=always",

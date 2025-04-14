@@ -6,7 +6,7 @@
     <title>{% block title %}Slim 4 Hexagonal App{% endblock %}</title>
 
     {# Vite CSS #}
-    <link rel="stylesheet" href="/build/assets/app-BBwJYtSL.css">
+    <link rel="stylesheet" href="{{ vite_asset('resources/css/app.css') }}">
 
     {# Preload fonty #}
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -104,6 +104,6 @@
     </footer>
 
     {# Vite JS #}
-    <script type="module" src="/build/assets/app-F1B1iBRr.js"></script>
+    <script type="module" src="{{ vite_asset('resources/js/app.js') }}"></script>
 </body>
 </html>

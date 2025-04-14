@@ -17,6 +17,7 @@ use App\Infrastructure\Middleware\AuthMiddleware;
 use App\Infrastructure\Middleware\SlimCsrfMiddleware;
 use App\Infrastructure\Persistence\DatabaseSessionRepository;
 use App\Infrastructure\Persistence\DatabaseSettingsRepository;
+use App\Twig\ViteExtension;
 use App\Ports\UserRepositoryInterface;
 use App\Ports\ArticleRepositoryInterface;
 use App\Ports\SessionRepositoryInterface;
@@ -38,7 +39,7 @@ return function (ContainerBuilder $containerBuilder) {
         ViteAssetHelper::class => function (ContainerInterface $c) {
             $settings = $c->get('settings');
             return new ViteAssetHelper(
-                __DIR__ . '/../public/build/manifest.json',
+                __DIR__ . '/../public/build/.vite/manifest.json',
                 false, // Nastavené na false, aby sa vždy používal produkčný build
                 'http://localhost:5173'
             );
@@ -96,6 +97,7 @@ return function (ContainerBuilder $containerBuilder) {
 
             // Pridanie Twig extensions
             $twig->addExtension(new UuidExtension());
+            $twig->addExtension(new ViteExtension());
 
             return $twig;
         },
