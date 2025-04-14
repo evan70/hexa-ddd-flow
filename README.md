@@ -15,6 +15,11 @@ Tento projekt implementuje hexagonálnu architektúru (ports and adapters) pre j
 │   └── 📂 ValueObject
 │       └── Uuid.php       (Value Object pre UUID)
 │
+├── 📂 Application     <- Aplikačná vrstva
+│   └── 📂 Service
+│       ├── ArticleService.php    (Služba pre prácu s článkami)
+│       └── UserService.php       (Služba pre prácu s používateľmi)
+│
 ├── 📂 Ports          <- Rozhrania pre služby
 │   ├── UserRepositoryInterface.php
 │   └── ArticleRepositoryInterface.php
@@ -26,6 +31,7 @@ Tento projekt implementuje hexagonálnu architektúru (ports and adapters) pre j
     ├── 📂 External
     │   └── ApiArticleRepository.php        (ukážková implementácia - nepoužíva sa)
     ├── 📂 Controller
+    │   ├── AbstractController.php         (abstraktná základná trieda pre kontroléry)
     │   ├── UserController.php              (controller pre používateľov)
     │   └── ArticleController.php           (controller pre články)
     ├── 📂 Helper
@@ -81,7 +87,8 @@ Tento projekt implementuje hexagonálnu architektúru (ports and adapters) pre j
 └── init-db.sh        <- Shell skript pre spustenie inicializácie
 
 📂 docs               <- Dokumentácia
-    └── frontend-optimization.md <- Dokumentácia optimalizácie frontendu
+    ├── frontend-optimization.md <- Dokumentácia optimalizácie frontendu
+    └── architecture-refactoring.md <- Dokumentácia refaktoringu architektúry
 ```
 
 ## Čistenie kódu
@@ -98,7 +105,13 @@ V rámci auditu a čistenia kódu boli vykonané tieto zmeny:
 3. **Pridané konfiguračné súbory**
    - Vytvorený `.gitignore` - pre ignorovanie súborov, ktoré nemajú byť verzované
    - Vytvorený `.env.example` - ukážkový súbor s konfiguráciou prostredia
-   - Aktualizovaný `composer.json` - pridané skripty pre bežné úlohy
+
+4. **Refaktoring architektúry**
+   - Pridaná aplikačná vrstva (Application Layer) so službami
+   - Vytvorená abstraktná základná trieda pre kontroléry
+   - Odstránená duplicita kódu v kontroléroch
+   - Lepšie dodržiavanie princípov hexagonálnej architektúry a DDD
+   - Podrobná dokumentácia v `docs/architecture-refactoring.md`
 
 ## UUID Value Object
 
@@ -187,7 +200,7 @@ const loadComponent = async (name) => {
 document.addEventListener('DOMContentLoaded', async () => {
   const darkMode = await loadComponent('darkMode');
   if (darkMode) darkMode.init();
-  
+
   const animations = await loadComponent('animations');
   if (animations) animations.init();
 });

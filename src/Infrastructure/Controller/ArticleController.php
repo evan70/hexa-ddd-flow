@@ -6,31 +6,30 @@ namespace App\Infrastructure\Controller;
 
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
-use App\Ports\ArticleRepositoryInterface;
-use App\Domain\ArticleType;
+use App\Application\Service\ArticleService;
+use App\Domain\Article;
 use Slim\Exception\HttpNotFoundException;
 use Slim\Views\Twig;
 
 /**
  * Controller pre články
  */
-class ArticleController
+class ArticleController extends AbstractController
 {
-    private ArticleRepositoryInterface $articleRepository;
-    private Twig $twig;
+    private ArticleService $articleService;
 
     /**
      * Konštruktor
      *
-     * @param ArticleRepositoryInterface $articleRepository
+     * @param ArticleService $articleService
      * @param Twig $twig
      */
     public function __construct(
-        ArticleRepositoryInterface $articleRepository,
+        ArticleService $articleService,
         Twig $twig
     ) {
-        $this->articleRepository = $articleRepository;
-        $this->twig = $twig;
+        parent::__construct($twig);
+        $this->articleService = $articleService;
     }
 
     /**
@@ -42,7 +41,7 @@ class ArticleController
      */
     public function index(Request $request, Response $response): Response
     {
-        $articles = $this->articleRepository->findAll();
+        $articles = $this->articleService->getAllArticles();
 
         $response->getBody()->write(json_encode($articles));
         return $response->withHeader('Content-Type', 'application/json');
@@ -61,11 +60,7 @@ class ArticleController
         $id = $args['id'];
 
         // UUID validácia je vykonávaná v middleware
-        $article = $this->articleRepository->findById($id);
-
-        if (!$article) {
-            throw new HttpNotFoundException($request, "Article not found");
-        }
+        $article = $this->articleService->getArticleById($id, $request);
 
         $response->getBody()->write(json_encode($article));
         return $response->withHeader('Content-Type', 'application/json');
@@ -81,16 +76,15 @@ class ArticleController
      */
     public function showByType(Request $request, Response $response, array $args): Response
     {
-        $type = $args['type'];
+        try {
+            $type = $args['type'];
+            $articles = $this->articleService->getArticlesByType($type, $request);
 
-        if (!ArticleType::isValid($type)) {
+            $response->getBody()->write(json_encode($articles));
+            return $response->withHeader('Content-Type', 'application/json');
+        } catch (HttpNotFoundException $e) {
             return $response->withStatus(400);
         }
-
-        $articles = $this->articleRepository->findByType($type);
-
-        $response->getBody()->write(json_encode($articles));
-        return $response->withHeader('Content-Type', 'application/json');
     }
 
     /**
@@ -189,11 +183,51 @@ class ArticleController
      */
     public function viewList(Request $request, Response $response): Response
     {
-        $articles = $this->articleRepository->findAll();
+        $articles = $this->articleService->getAllArticles();
 
-        return $this->twig->render($response, 'articles/list.twig', [
-            'articles' => $articles
+        return $this->render($response, 'articles/list.twig', [
+            'articles' => $articles,
+            'title' => 'Zoznam článkov',
+            'type' => null,
+            'categories' => $this->articleService->getAllCategories(),
+            'tags' => $this->articleService->getAllTags()
         ]);
+    }
+
+    /**
+     * Zobrazí HTML zoznam článkov podľa typu
+     *
+     * @param Request $request
+     * @param Response $response
+     * @param array $args
+     * @return Response
+     */
+    public function viewByType(Request $request, Response $response, array $args): Response
+    {
+        $type = $args['type'] ?? '';
+
+        try {
+            $articles = $this->articleService->getArticlesByType($type, $request);
+
+            // Nastavenie nadpisu podľa typu
+            $titles = [
+                Article::TYPE_ARTICLE => 'Zoznam článkov',
+                Article::TYPE_PRODUCT => 'Zoznam produktov',
+                Article::TYPE_PAGE => 'Zoznam stránok'
+            ];
+
+            $title = $titles[$type] ?? 'Zoznam článkov podľa typu: ' . $type;
+
+            return $this->render($response, 'articles/list.twig', [
+                'articles' => $articles,
+                'title' => $title,
+                'type' => $type,
+                'categories' => $this->articleService->getAllCategories(),
+                'tags' => $this->articleService->getAllTags()
+            ]);
+        } catch (HttpNotFoundException $e) {
+            throw $e;
+        }
     }
 
     /**
@@ -209,14 +243,60 @@ class ArticleController
         $id = $args['id'];
 
         // UUID validácia je vykonávaná v middleware
-        $article = $this->articleRepository->findById($id);
+        $article = $this->articleService->getArticleById($id, $request);
 
-        if (!$article) {
-            throw new HttpNotFoundException($request, "Article not found");
-        }
-
-        return $this->twig->render($response, 'articles/detail.twig', [
+        return $this->render($response, 'articles/detail.twig', [
             'article' => $article
+        ]);
+    }
+
+    /**
+     * Zobrazí HTML zoznam článkov podľa kategórie
+     *
+     * @param Request $request
+     * @param Response $response
+     * @param array $args
+     * @return Response
+     */
+    public function viewByCategory(Request $request, Response $response, array $args): Response
+    {
+        $category = $args['category'] ?? '';
+
+        $articles = $this->articleService->getArticlesByCategory($category);
+
+        return $this->render($response, 'articles/list.twig', [
+            'articles' => $articles,
+            'title' => 'Články v kategórii: ' . $category,
+            'type' => null,
+            'filter_type' => 'category',
+            'filter_value' => $category,
+            'categories' => $this->articleService->getAllCategories(),
+            'tags' => $this->articleService->getAllTags()
+        ]);
+    }
+
+    /**
+     * Zobrazí HTML zoznam článkov podľa tagu
+     *
+     * @param Request $request
+     * @param Response $response
+     * @param array $args
+     * @return Response
+     */
+    public function viewByTag(Request $request, Response $response, array $args): Response
+    {
+        $tag = $args['tag'] ?? '';
+
+        $articles = $this->articleService->getArticlesByTag($tag);
+
+        return $this->render($response, 'articles/list.twig', [
+            'articles' => $articles,
+            'title' => 'Články s tagom: ' . $tag,
+            'type' => null,
+            'filter_type' => 'tag',
+            'filter_value' => $tag,
+            'categories' => $this->articleService->getAllCategories(),
+            'tags' => $this->articleService->getAllTags()
         ]);
     }
 }

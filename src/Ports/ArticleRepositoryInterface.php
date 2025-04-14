@@ -54,4 +54,34 @@ interface ArticleRepositoryInterface
      * @return bool Success status
      */
     public function delete(string|Uuid $id): bool;
+
+    /**
+     * Find articles by category
+     *
+     * @param string $category
+     * @return array List of articles with the specified category
+     */
+    public function findByCategory(string $category): array;
+
+    /**
+     * Find articles by tag
+     *
+     * @param string $tag
+     * @return array List of articles with the specified tag
+     */
+    public function findByTag(string $tag): array;
+
+    /**
+     * Get all unique categories from articles
+     *
+     * @return array List of all categories
+     */
+    public function getAllCategories(): array;
+
+    /**
+     * Get all unique tags from articles
+     *
+     * @return array List of all tags
+     */
+    public function getAllTags(): array;
 }

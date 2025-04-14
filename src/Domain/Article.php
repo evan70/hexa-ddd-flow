@@ -5,36 +5,43 @@ declare(strict_types=1);
 namespace App\Domain;
 
 /**
- * Trieda pre typy článkov
+ * Trieda pre články
  */
-class ArticleType
+class Article
 {
-    public const ARTICLE = 'article';
-    public const PRODUCT = 'product';
-    public const PAGE = 'page';
-
     /**
-     * Vráti všetky dostupné typy
-     *
-     * @return array
+     * Typy článkov
      */
-    public static function getAll(): array
-    {
-        return [
-            self::ARTICLE,
-            self::PRODUCT,
-            self::PAGE
-        ];
-    }
-
+    public const TYPE_ARTICLE = 'article';
+    public const TYPE_PRODUCT = 'product';
+    public const TYPE_PAGE = 'page';
+    
     /**
-     * Overí, či je typ platný
+     * Overí, či je typ článku platný
      *
      * @param string $type
      * @return bool
      */
-    public static function isValid(string $type): bool
+    public static function isValidType(string $type): bool
     {
-        return in_array($type, self::getAll());
+        return in_array($type, [
+            self::TYPE_ARTICLE,
+            self::TYPE_PRODUCT,
+            self::TYPE_PAGE
+        ]);
+    }
+    
+    /**
+     * Vráti všetky dostupné typy článkov
+     *
+     * @return array
+     */
+    public static function getAllTypes(): array
+    {
+        return [
+            self::TYPE_ARTICLE,
+            self::TYPE_PRODUCT,
+            self::TYPE_PAGE
+        ];
     }
 }

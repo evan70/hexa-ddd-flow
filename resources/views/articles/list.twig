@@ -10,22 +10,85 @@
         <div class="absolute inset-0 bg-gradient-to-r from-gray-900 to-transparent"></div>
     </div>
     <div class="relative max-w-7xl mx-auto py-16 px-4 sm:py-24 sm:px-6 lg:px-8">
-        <h1 class="text-4xl font-extrabold tracking-tight text-white sm:text-5xl lg:text-6xl">Zoznam článkov</h1>
+        <h1 class="text-4xl font-extrabold tracking-tight text-white sm:text-5xl lg:text-6xl">{{ title }}</h1>
         <p class="mt-6 text-xl text-gray-300 max-w-3xl">
-            Prehľad všetkých dostupných článkov v systéme
+            {% if type == 'product' %}
+                Prehľad všetkých dostupných produktov v systéme
+            {% elseif type == 'page' %}
+                Prehľad všetkých dostupných stránok v systéme
+            {% else %}
+                Prehľad všetkých dostupných článkov v systéme
+            {% endif %}
         </p>
     </div>
 </div>
 
 <div class="container">
     <div class="mb-6 slide-up">
-        <a href="/" class="btn btn-secondary inline-flex items-center">
-            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
-            </svg>
-            Späť na domovskú stránku
-        </a>
+        <div class="flex flex-wrap gap-2 items-center">
+            <a href="/" class="btn btn-secondary inline-flex items-center">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                </svg>
+                Späť na domovskú stránku
+            </a>
+
+            {% if filter_type is defined and filter_value is defined %}
+                <a href="/web/view/articles" class="btn btn-primary inline-flex items-center">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                    Zrušiť filter
+                </a>
+            {% endif %}
+        </div>
     </div>
+
+    {% if categories is defined and categories|length > 0 %}
+    <div class="mb-6 slide-up">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="text-lg font-semibold">Kategórie</h3>
+            </div>
+            <div class="card-body">
+                <div class="flex flex-wrap gap-2">
+                    {% for category in categories %}
+                        <a href="/web/view/category/{{ category }}" class="px-2 py-1 text-xs font-semibold rounded-full bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200 hover:bg-indigo-200 dark:hover:bg-indigo-800 transition-theme
+                            {% if filter_type is defined and filter_type == 'category' and filter_value == category %}
+                                !bg-indigo-500 !text-white dark:!bg-indigo-600
+                            {% endif %}
+                        ">
+                            {{ category }}
+                        </a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if tags is defined and tags|length > 0 %}
+    <div class="mb-6 slide-up">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="text-lg font-semibold">Tagy</h3>
+            </div>
+            <div class="card-body">
+                <div class="flex flex-wrap gap-2">
+                    {% for tag in tags %}
+                        <a href="/web/view/tag/{{ tag }}" class="px-2 py-1 text-xs font-semibold rounded-full bg-pink-100 text-pink-800 dark:bg-pink-900 dark:text-pink-200 hover:bg-pink-200 dark:hover:bg-pink-800 transition-theme
+                            {% if filter_type is defined and filter_type == 'tag' and filter_value == tag %}
+                                !bg-pink-500 !text-white dark:!bg-pink-600
+                            {% endif %}
+                        ">
+                            {{ tag }}
+                        </a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
 
     {% if articles is empty %}
         <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 slide-up dark:bg-yellow-900 dark:border-yellow-600">
@@ -71,6 +134,24 @@
                         <p class="text-gray-600 dark:text-gray-400 mb-4">
                             {{ article.content|length > 100 ? article.content|slice(0, 100) ~ '...' : article.content }}
                         </p>
+
+                        {% if article.categories is defined and article.categories|length > 0 %}
+                        <div class="flex flex-wrap gap-1 mb-2">
+                            {% for category in article.categories %}
+                                <a href="/web/view/category/{{ category }}" class="px-2 py-0.5 text-xs font-semibold rounded-full bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200 hover:bg-indigo-200 dark:hover:bg-indigo-800 transition-theme">
+                                    {{ category }}
+                                </a>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+
+                        {% if article.tag is defined and article.tag is not empty %}
+                        <div class="mb-2">
+                            <a href="/web/view/tag/{{ article.tag }}" class="px-2 py-0.5 text-xs font-semibold rounded-full bg-pink-100 text-pink-800 dark:bg-pink-900 dark:text-pink-200 hover:bg-pink-200 dark:hover:bg-pink-800 transition-theme">
+                                {{ article.tag }}
+                            </a>
+                        </div>
+                        {% endif %}
                     </div>
                     <div class="card-footer">
                         <div class="flex items-center justify-between">
@@ -96,6 +177,8 @@
                             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">ID</th>
                             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Názov</th>
                             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Typ</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Kategórie</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Tag</th>
                             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Autor ID</th>
                             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Vytvorené</th>
                             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Akcie</th>
@@ -118,6 +201,28 @@
                                     ">
                                         {{ article.type }}
                                     </span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
+                                    {% if article.categories is defined and article.categories|length > 0 %}
+                                        <div class="flex flex-wrap gap-1">
+                                            {% for category in article.categories %}
+                                                <a href="/web/view/category/{{ category }}" class="px-2 py-0.5 text-xs font-semibold rounded-full bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200 hover:bg-indigo-200 dark:hover:bg-indigo-800 transition-theme">
+                                                    {{ category }}
+                                                </a>
+                                            {% endfor %}
+                                        </div>
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
+                                    {% if article.tag is defined and article.tag is not empty %}
+                                        <a href="/web/view/tag/{{ article.tag }}" class="px-2 py-0.5 text-xs font-semibold rounded-full bg-pink-100 text-pink-800 dark:bg-pink-900 dark:text-pink-200 hover:bg-pink-200 dark:hover:bg-pink-800 transition-theme">
+                                            {{ article.tag }}
+                                        </a>
+                                    {% else %}
+                                        -
+                                    {% endif %}
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{{ uuid_short(article.author_id) }}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{{ article.created_at }}</td>
