@@ -104,6 +104,7 @@ return function (App $app) {
 
         // Nastavenia
         $group->get('/settings', [MarkController::class, 'settings']);
+        $group->post('/settings', [MarkController::class, 'settings']);
 
         // API pre používateľov
         $group->post('/api/users', [UserController::class, 'create']);

@@ -57,7 +57,7 @@ $sampleUsers = [
         User::ADMIN,
         password_hash('password123', PASSWORD_DEFAULT)
     ),
-    
+
     // Editori
     UserFactory::create(
         'editor@example.com',
@@ -77,7 +77,7 @@ $sampleUsers = [
         User::EDITOR,
         password_hash('password123', PASSWORD_DEFAULT)
     ),
-    
+
     // Autori
     UserFactory::create(
         'author@example.com',
@@ -103,7 +103,7 @@ $sampleUsers = [
         User::AUTHOR,
         password_hash('password123', PASSWORD_DEFAULT)
     ),
-    
+
     // Používatelia
     UserFactory::create(
         'subscriber@example.com',
@@ -230,21 +230,21 @@ $tags = [
 function getRandomCategories($categories, $min = 1, $max = 3) {
     $count = rand($min, $max);
     $selectedCategories = [];
-    
+
     // Zabezpečenie, že počet kategórií neprekročí počet dostupných kategórií
     $count = min($count, count($categories));
-    
+
     $keys = array_rand($categories, $count);
-    
+
     // Ak je vybraná len jedna kategória, array_rand vráti int namiesto poľa
     if (!is_array($keys)) {
         $keys = [$keys];
     }
-    
+
     foreach ($keys as $key) {
         $selectedCategories[] = $categories[$key];
     }
-    
+
     return $selectedCategories;
 }
 
@@ -264,12 +264,12 @@ function generateContent($paragraphs = 3) {
         "Nulla quis lorem ut libero malesuada feugiat. Curabitur non nulla sit amet nisl tempus convallis quis ac lectus. Sed porttitor lectus nibh.",
         "Vivamus magna justo, lacinia eget consectetur sed, convallis at tellus. Nulla porttitor accumsan tincidunt. Curabitur aliquet quam id dui posuere blandit."
     ];
-    
+
     $content = '';
     for ($i = 0; $i < $paragraphs; $i++) {
         $content .= $loremIpsum[array_rand($loremIpsum)] . "\n\n";
     }
-    
+
     return trim($content);
 }
 
@@ -286,7 +286,7 @@ function getCategoriesByType($type, $categories) {
             // Produkty majú obmedzený výber kategórií
             $productCategories = array_filter($categories, function($category) {
                 return in_array($category, [
-                    'PHP', 'JavaScript', 'Framework', 'Library', 'Tutorial', 
+                    'PHP', 'JavaScript', 'Framework', 'Library', 'Tutorial',
                     'Best Practices', 'Performance', 'Security', 'Architecture', 'Testing'
                 ]);
             });
@@ -310,7 +310,7 @@ function getTagByType($type, $tags) {
             // Produkty majú obmedzený výber tagov
             $productTags = array_filter($tags, function($tag) {
                 return in_array($tag, [
-                    'premium', 'exclusive', 'featured', 'recommended', 'new', 
+                    'premium', 'exclusive', 'featured', 'recommended', 'new',
                     'updated', 'hot', 'trending', 'popular', 'essential'
                 ]);
             });
@@ -342,11 +342,11 @@ foreach ($articleTitles as $index => $title) {
     $authorIndex = array_rand(array_filter($sampleUsers, function($user) {
         return $user['role'] === User::AUTHOR || $user['role'] === User::EDITOR;
     }));
-    
+
     // Získanie kategórií a tagu pre článok
     $articleCategories = getCategoriesByType('article', $categories);
     $articleTag = getTagByType('article', $tags);
-    
+
     $sampleArticles[] = [
         'id' => (string) Uuid::generate(),
         'title' => $title,
@@ -379,11 +379,11 @@ foreach ($productTitles as $index => $title) {
     $authorIndex = array_rand(array_filter($sampleUsers, function($user) {
         return $user['role'] === User::EDITOR || $user['role'] === User::ADMIN;
     }));
-    
+
     // Získanie kategórií a tagu pre produkt
     $productCategories = getCategoriesByType('product', $categories);
     $productTag = getTagByType('product', $tags);
-    
+
     $sampleArticles[] = [
         'id' => (string) Uuid::generate(),
         'title' => $title,
@@ -416,11 +416,11 @@ foreach ($pageTitles as $index => $title) {
     $authorIndex = array_rand(array_filter($sampleUsers, function($user) {
         return $user['role'] === User::ADMIN;
     }));
-    
+
     // Získanie kategórií a tagu pre stránku
     $pageCategories = getCategoriesByType('page', $categories);
     $pageTag = getTagByType('page', $tags);
-    
+
     $sampleArticles[] = [
         'id' => (string) Uuid::generate(),
         'title' => $title,
@@ -461,7 +461,7 @@ foreach ($articles as $article) {
         }
         $categoryStats[$category]++;
     }
-    
+
     if (!empty($article['tag'])) {
         if (!isset($tagStats[$article['tag']])) {
             $tagStats[$article['tag']] = 0;
@@ -499,6 +499,105 @@ foreach ($tagStats as $tag => $count) {
     echo "  - {$tag}: {$count}\n";
     $i++;
     if ($i >= 5) break;
+}
+
+// Inicializácia app databázy
+$appPdo = new PDO('sqlite:' . $settings['database']['app']['path']);
+$appPdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+// Vymazanie existujúcej tabuľky settings, ak existuje
+$appPdo->exec('DROP TABLE IF EXISTS settings');
+
+// Vytvorenie tabuľky settings
+$appPdo->exec('
+    CREATE TABLE settings (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        key TEXT NOT NULL UNIQUE,
+        value TEXT NOT NULL,
+        created_at DATETIME NOT NULL,
+        updated_at DATETIME NOT NULL
+    )
+');
+
+echo "Tabuľka settings vytvorená.\n";
+
+// Pridanie základných nastavení
+$defaultSettings = [
+    [
+        'key' => 'site_name',
+        'value' => 'MarkCMS',
+        'created_at' => date('Y-m-d H:i:s'),
+        'updated_at' => date('Y-m-d H:i:s')
+    ],
+    [
+        'key' => 'site_description',
+        'value' => 'Moderný CMS systém pre vývojárov',
+        'created_at' => date('Y-m-d H:i:s'),
+        'updated_at' => date('Y-m-d H:i:s')
+    ],
+    [
+        'key' => 'site_logo',
+        'value' => '/build/assets/logo.png',
+        'created_at' => date('Y-m-d H:i:s'),
+        'updated_at' => date('Y-m-d H:i:s')
+    ],
+    [
+        'key' => 'theme',
+        'value' => 'light',
+        'created_at' => date('Y-m-d H:i:s'),
+        'updated_at' => date('Y-m-d H:i:s')
+    ],
+    [
+        'key' => 'articles_per_page',
+        'value' => '10',
+        'created_at' => date('Y-m-d H:i:s'),
+        'updated_at' => date('Y-m-d H:i:s')
+    ],
+    [
+        'key' => 'enable_comments',
+        'value' => 'true',
+        'created_at' => date('Y-m-d H:i:s'),
+        'updated_at' => date('Y-m-d H:i:s')
+    ],
+    [
+        'key' => 'maintenance_mode',
+        'value' => 'false',
+        'created_at' => date('Y-m-d H:i:s'),
+        'updated_at' => date('Y-m-d H:i:s')
+    ],
+    [
+        'key' => 'contact_email',
+        'value' => 'admin@example.com',
+        'created_at' => date('Y-m-d H:i:s'),
+        'updated_at' => date('Y-m-d H:i:s')
+    ],
+    [
+        'key' => 'social_links',
+        'value' => json_encode([
+            'facebook' => 'https://facebook.com/markcms',
+            'twitter' => 'https://twitter.com/markcms',
+            'instagram' => 'https://instagram.com/markcms',
+            'linkedin' => 'https://linkedin.com/company/markcms'
+        ]),
+        'created_at' => date('Y-m-d H:i:s'),
+        'updated_at' => date('Y-m-d H:i:s')
+    ],
+    [
+        'key' => 'footer_text',
+        'value' => '&copy; ' . date('Y') . ' MarkCMS. Všetky práva vyhradené.',
+        'created_at' => date('Y-m-d H:i:s'),
+        'updated_at' => date('Y-m-d H:i:s')
+    ]
+];
+
+$stmt = $appPdo->prepare('
+    INSERT INTO settings (key, value, created_at, updated_at)
+    VALUES (:key, :value, :created_at, :updated_at)
+');
+
+foreach ($defaultSettings as $setting) {
+    $stmt->execute($setting);
+    echo "Nastavenie {$setting['key']} pridané.\n";
 }
 
 echo "\nInicializácia databáz dokončená.\n";

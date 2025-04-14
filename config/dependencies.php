@@ -17,13 +17,16 @@ use App\Infrastructure\Middleware\CsrfMiddleware;
 use App\Infrastructure\Middleware\SessionMiddleware;
 use App\Infrastructure\Middleware\SlimCsrfMiddleware;
 use App\Infrastructure\Persistence\DatabaseSessionRepository;
+use App\Infrastructure\Persistence\DatabaseSettingsRepository;
 use App\Ports\UserRepositoryInterface;
 use App\Ports\ArticleRepositoryInterface;
 use App\Ports\SessionRepositoryInterface;
+use App\Ports\SettingsRepositoryInterface;
 use App\Application\Service\ArticleService;
 use App\Application\Service\UserService;
 use App\Application\Service\AuthService;
 use App\Application\Service\CsrfService;
+use App\Application\Service\SettingsService;
 use Slim\Csrf\Guard;
 use DI\ContainerBuilder;
 use Psr\Container\ContainerInterface;
@@ -208,6 +211,14 @@ return function (ContainerBuilder $containerBuilder) {
             return new DatabaseSessionRepository($c->get('app_pdo'));
         },
 
+        SettingsRepositoryInterface::class => function (ContainerInterface $c) {
+            return new DatabaseSettingsRepository($c->get('app_pdo'));
+        },
+
+        SettingsService::class => function (ContainerInterface $c) {
+            return new SettingsService($c->get(SettingsRepositoryInterface::class));
+        },
+
         AuthService::class => function (ContainerInterface $c) {
             return new AuthService(
                 $c->get(UserRepositoryInterface::class),
@@ -238,6 +249,7 @@ return function (ContainerBuilder $containerBuilder) {
                 $c->get(ArticleService::class),
                 $c->get(UserService::class),
                 $c->get(AuthService::class),
+                $c->get(SettingsService::class),
                 $c->get(Twig::class)
             );
         },

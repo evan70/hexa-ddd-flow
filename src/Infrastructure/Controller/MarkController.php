@@ -7,6 +7,7 @@ namespace App\Infrastructure\Controller;
 use App\Application\Service\ArticleService;
 use App\Application\Service\UserService;
 use App\Application\Service\AuthService;
+use App\Application\Service\SettingsService;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\Views\Twig;
@@ -16,6 +17,7 @@ class MarkController extends AbstractController
     private ArticleService $articleService;
     private UserService $userService;
     private AuthService $authService;
+    private SettingsService $settingsService;
 
     /**
      * Konštruktor
@@ -23,18 +25,21 @@ class MarkController extends AbstractController
      * @param ArticleService $articleService
      * @param UserService $userService
      * @param AuthService $authService
+     * @param SettingsService $settingsService
      * @param Twig $twig
      */
     public function __construct(
         ArticleService $articleService,
         UserService $userService,
         AuthService $authService,
+        SettingsService $settingsService,
         Twig $twig
     ) {
         parent::__construct($twig);
         $this->articleService = $articleService;
         $this->userService = $userService;
         $this->authService = $authService;
+        $this->settingsService = $settingsService;
     }
 
     /**
@@ -48,7 +53,7 @@ class MarkController extends AbstractController
     {
         $articles = $this->articleService->getAllArticles();
         $users = $this->userService->getAllUsers();
-        
+
         return $this->render($response, 'mark/dashboard.twig', [
             'articles' => $articles,
             'users' => $users,
@@ -67,7 +72,7 @@ class MarkController extends AbstractController
     public function users(Request $request, Response $response): Response
     {
         $users = $this->userService->getAllUsers();
-        
+
         return $this->render($response, 'mark/users.twig', [
             'users' => $users
         ]);
@@ -84,7 +89,7 @@ class MarkController extends AbstractController
     public function userDetail(Request $request, Response $response, array $args): Response
     {
         $user = $this->userService->getUserById($args['id'], $request);
-        
+
         return $this->render($response, 'mark/user-detail.twig', [
             'user' => $user
         ]);
@@ -113,7 +118,7 @@ class MarkController extends AbstractController
     public function editUserForm(Request $request, Response $response, array $args): Response
     {
         $user = $this->userService->getUserById($args['id'], $request);
-        
+
         return $this->render($response, 'mark/user-form.twig', [
             'user' => $user
         ]);
@@ -129,7 +134,7 @@ class MarkController extends AbstractController
     public function articles(Request $request, Response $response): Response
     {
         $articles = $this->articleService->getAllArticles();
-        
+
         return $this->render($response, 'mark/articles.twig', [
             'articles' => $articles
         ]);
@@ -146,7 +151,7 @@ class MarkController extends AbstractController
     public function articleDetail(Request $request, Response $response, array $args): Response
     {
         $article = $this->articleService->getArticleById($args['id'], $request);
-        
+
         return $this->render($response, 'mark/article-detail.twig', [
             'article' => $article
         ]);
@@ -175,7 +180,7 @@ class MarkController extends AbstractController
     public function editArticleForm(Request $request, Response $response, array $args): Response
     {
         $article = $this->articleService->getArticleById($args['id'], $request);
-        
+
         return $this->render($response, 'mark/article-form.twig', [
             'article' => $article
         ]);
@@ -190,6 +195,22 @@ class MarkController extends AbstractController
      */
     public function settings(Request $request, Response $response): Response
     {
-        return $this->render($response, 'mark/settings.twig');
+        // Získanie všetkých nastavení
+        $settings = $this->settingsService->getAll();
+
+        // Spracovanie formulára
+        if ($request->getMethod() === 'POST') {
+            $data = $request->getParsedBody();
+
+            // Uloženie nastavení
+            $this->settingsService->setMultiple($data);
+
+            // Presmerovanie späť na nastavenia
+            return $response->withHeader('Location', '/mark/settings')->withStatus(302);
+        }
+
+        return $this->render($response, 'mark/settings.twig', [
+            'settings' => $settings
+        ]);
     }
 }
