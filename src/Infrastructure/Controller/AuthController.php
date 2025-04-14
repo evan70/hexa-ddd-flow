@@ -36,11 +36,18 @@ class AuthController extends AbstractController
      */
     public function loginPage(Request $request, Response $response): Response
     {
-        // Ak je používateľ už prihlásený, presmerujeme ho na domovskú stránku
+        // Ak je používateľ už prihlásený, presmerujeme ho podľa jeho role
         if ($this->authService->isLoggedIn($request)) {
-            return $response
-                ->withHeader('Location', '/')
-                ->withStatus(302);
+            $user = $this->authService->getCurrentUser($request);
+            if ($user && $user['role'] === 'admin') {
+                return $response
+                    ->withHeader('Location', '/mark')
+                    ->withStatus(302);
+            } else {
+                return $response
+                    ->withHeader('Location', '/')
+                    ->withStatus(302);
+            }
         }
 
         return $this->render($response, 'auth/login.twig');
@@ -74,10 +81,16 @@ class AuthController extends AbstractController
             ]);
         }
 
-        // Prihlásenie úspešné, presmerujeme používateľa na domovskú stránku
-        return $response
-            ->withHeader('Location', '/')
-            ->withStatus(302);
+        // Prihlásenie úspešné, presmerujeme používateľa podľa jeho role
+        if ($user['role'] === 'admin') {
+            return $response
+                ->withHeader('Location', '/mark')
+                ->withStatus(302);
+        } else {
+            return $response
+                ->withHeader('Location', '/')
+                ->withStatus(302);
+        }
     }
 
     /**

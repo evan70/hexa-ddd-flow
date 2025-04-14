@@ -3,16 +3,7 @@
     "description": "Hexagonal architecture with Slim 4, SQLite, Twig, Ramsey UUID, TailwindCSS and GSAP",
     "type": "project",
     "license": "MIT",
-    "autoload": {
-        "psr-4": {
-            "App\\": "src/"
-        }
-    },
-    "autoload-dev": {
-        "psr-4": {
-            "Tests\\": "tests/"
-        }
-    },
+
     "require": {
         "php": "^8.3",
         "bryanjhv/slim-session": "^4.1",
@@ -42,6 +33,16 @@
             "@php -r \"file_exists('.env') || copy('.env.example', '.env');\"",
             "@init-db"
         ]
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
+        }
     },
     "config": {
         "process-timeout": 0,

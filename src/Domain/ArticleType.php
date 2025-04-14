@@ -12,7 +12,7 @@ class ArticleType
     public const ARTICLE = 'article';
     public const PRODUCT = 'product';
     public const PAGE = 'page';
-    
+
     /**
      * Vráti všetky dostupné typy
      *
@@ -26,7 +26,7 @@ class ArticleType
             self::PAGE
         ];
     }
-    
+
     /**
      * Overí, či je typ platný
      *

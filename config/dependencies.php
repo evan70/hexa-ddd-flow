@@ -13,7 +13,7 @@ use App\Infrastructure\Controller\MarkController;
 use App\Infrastructure\Controller\AbstractController;
 use App\Infrastructure\Twig\UuidExtension;
 use App\Infrastructure\Middleware\AuthMiddleware;
-use App\Infrastructure\Middleware\CsrfMiddleware;
+// Odstránené: use App\Infrastructure\Middleware\CsrfMiddleware;
 use App\Infrastructure\Middleware\SlimCsrfMiddleware;
 use App\Infrastructure\Persistence\DatabaseSessionRepository;
 use App\Infrastructure\Persistence\DatabaseSettingsRepository;
@@ -24,7 +24,7 @@ use App\Ports\SettingsRepositoryInterface;
 use App\Application\Service\ArticleService;
 use App\Application\Service\UserService;
 use App\Application\Service\AuthService;
-use App\Application\Service\CsrfService;
+// Odstránené: use App\Application\Service\CsrfService;
 use App\Application\Service\SettingsService;
 use Slim\Csrf\Guard;
 use DI\ContainerBuilder;
@@ -93,9 +93,6 @@ return function (ContainerBuilder $containerBuilder) {
 
             // Pridanie AuthService do Twig
             $twig->getEnvironment()->addGlobal('auth', $c->get(AuthService::class));
-
-            // Pridanie CsrfService do Twig
-            $twig->getEnvironment()->addGlobal('csrf', $c->get(CsrfService::class));
 
             // Pridanie Twig extensions
             $twig->addExtension(new UuidExtension());
@@ -227,14 +224,7 @@ return function (ContainerBuilder $containerBuilder) {
             );
         },
 
-        CsrfService::class => function (ContainerInterface $c) {
-            return new CsrfService(
-                $c->get(SessionRepositoryInterface::class),
-                'session_id',
-                'csrf_token',
-                3600 // 1 hodina
-            );
-        },
+        // Odstránené: CsrfService
 
         AuthController::class => function (ContainerInterface $c) {
             return new AuthController(
@@ -257,16 +247,12 @@ return function (ContainerBuilder $containerBuilder) {
             return new AuthMiddleware(
                 $c->get(AuthService::class),
                 ['admin'], // Len používatelia s rolou admin majú prístup k MarkCMS
-                '/login'
+                '/login',
+                $c->get(Twig::class)
             );
         },
 
-        CsrfMiddleware::class => function (ContainerInterface $c) {
-            return new CsrfMiddleware(
-                $c->get(CsrfService::class),
-                ['/api', '/login'] // Cesty vylúčené z CSRF ochrany
-            );
-        },
+        // Odstránené: CsrfMiddleware
 
         Guard::class => function (ContainerInterface $c) {
             // Spustenie session, ak ešte nie je spustená

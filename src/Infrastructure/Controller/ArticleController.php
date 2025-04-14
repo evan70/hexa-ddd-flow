@@ -100,12 +100,27 @@ class ArticleController extends AbstractController
         $data = $request->getParsedBody();
 
         // Validácia dát
-        if (!isset($data['title']) || !isset($data['content']) || !isset($data['type']) || !isset($data['author_id'])) {
-            return $response->withStatus(400);
+        $requiredFields = ['title', 'content', 'type', 'author_id'];
+        $missingFields = [];
+
+        foreach ($requiredFields as $field) {
+            if (!isset($data[$field]) || empty($data[$field])) {
+                $missingFields[] = $field;
+            }
+        }
+
+        if (!empty($missingFields)) {
+            $response->getBody()->write(json_encode([
+                'error' => 'Chýbajú povinné polia: ' . implode(', ', $missingFields)
+            ]));
+            return $response->withHeader('Content-Type', 'application/json')->withStatus(400);
         }
 
         if (!ArticleType::isValidType($data['type'])) {
-            return $response->withStatus(400);
+            $response->getBody()->write(json_encode([
+                'error' => 'Neplatný typ článku: ' . $data['type']
+            ]));
+            return $response->withHeader('Content-Type', 'application/json')->withStatus(400);
         }
 
         // UUID validácia je vykonávaná v middleware
@@ -113,7 +128,15 @@ class ArticleController extends AbstractController
         try {
             $id = $this->articleService->createArticle($data);
         } catch (\InvalidArgumentException $e) {
-            return $response->withStatus(400);
+            $response->getBody()->write(json_encode([
+                'error' => $e->getMessage()
+            ]));
+            return $response->withHeader('Content-Type', 'application/json')->withStatus(400);
+        } catch (\Exception $e) {
+            $response->getBody()->write(json_encode([
+                'error' => 'Chyba pri ukladaní článku: ' . $e->getMessage()
+            ]));
+            return $response->withHeader('Content-Type', 'application/json')->withStatus(500);
         }
 
         $response->getBody()->write(json_encode(['id' => $id]));
@@ -240,7 +263,7 @@ class ArticleController extends AbstractController
     }
 
     /**
-     * Zobrazí HTML detail článku
+     * Zobrazí HTML detail článku podľa ID
      *
      * @param Request $request
      * @param Response $response
@@ -257,6 +280,41 @@ class ArticleController extends AbstractController
         return $this->render($response, 'articles/detail.twig', [
             'article' => $article
         ]);
+    }
+
+    /**
+     * Zobrazí HTML detail článku podľa slugu
+     *
+     * @param Request $request
+     * @param Response $response
+     * @param array $args
+     * @return Response
+     */
+    public function viewBySlug(Request $request, Response $response, array $args): Response
+    {
+        $slug = $args['slug'];
+        $type = $args['type'];
+
+        try {
+            // Kontrola, či je typ platný
+            if (!Article::isValidType($type)) {
+                throw new HttpNotFoundException($request, "Typ článku '{$type}' nebol nájdený");
+            }
+
+            // Získanie článku podľa slugu
+            $article = $this->articleService->getArticleBySlug($slug, $request);
+
+            // Kontrola, či článok má správny typ
+            if ($article['type'] !== $type) {
+                throw new HttpNotFoundException($request, "Typ článku '{$type}' nebol nájdený");
+            }
+
+            return $this->render($response, 'articles/detail.twig', [
+                'article' => $article
+            ]);
+        } catch (HttpNotFoundException $e) {
+            throw $e;
+        }
     }
 
     /**

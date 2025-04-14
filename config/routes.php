@@ -67,9 +67,12 @@ return function (App $app) {
         // HTML zobrazenie článkov
         $group->get('/view/articles', [ArticleController::class, 'viewList']);
 
-        // HTML zobrazenie článku
+        // HTML zobrazenie článku podľa ID
         $group->get('/view/articles/{id}', [ArticleController::class, 'viewDetail'])
             ->add(UuidValidatorMiddleware::class);
+
+        // HTML zobrazenie článku podľa slugu
+        $group->get('/view/{type}/{slug}', [ArticleController::class, 'viewBySlug']);
 
         // HTML zobrazenie článkov podľa typu
         $group->get('/view/{type}', [ArticleController::class, 'viewByType']);

@@ -51,6 +51,9 @@ class MarkController extends AbstractController
      */
     public function dashboard(Request $request, Response $response): Response
     {
+        // Získanie aktuálneho používateľa (už vieme, že je prihlásený a má rolu admin vďaka AuthMiddleware)
+        $user = $this->authService->getCurrentUser($request);
+
         $articles = $this->articleService->getAllArticles();
         $users = $this->userService->getAllUsers();
 

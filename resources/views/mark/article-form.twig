@@ -15,6 +15,8 @@
             {% if article is defined %}
                 <input type="hidden" name="id" value="{{ article.id }}">
             {% endif %}
+            <!-- Pridanie skrytého poľa author_id s ID aktuálne prihláseného používateľa -->
+            <input type="hidden" name="author_id" value="{{ auth.getUser().id }}">
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div class="md:col-span-2">
@@ -111,7 +113,13 @@ document.getElementById('articleForm').addEventListener('submit', function(e) {
     })
     .then(response => {
         if (!response.ok) {
-            throw new Error('Chyba pri ukladaní článku');
+            // Pokus o získanie detailov chyby z odpovede
+            return response.json().then(errorData => {
+                throw new Error(errorData.error || 'Chyba pri ukladaní článku');
+            }).catch(() => {
+                // Ak sa nepodarilo získať JSON, použijeme všeobecnú chybu
+                throw new Error(`Chyba pri ukladaní článku (${response.status}: ${response.statusText})`);
+            });
         }
         return response.json();
     })
@@ -119,6 +127,7 @@ document.getElementById('articleForm').addEventListener('submit', function(e) {
         window.location.href = '/mark/articles';
     })
     .catch(error => {
+        console.error('Chyba:', error);
         alert(error.message);
     });
 });

@@ -119,6 +119,25 @@ class ArticleService
     }
 
     /**
+     * Získa článok podľa slugu
+     *
+     * @param string $slug Slug článku
+     * @param Request $request
+     * @return array
+     * @throws HttpNotFoundException
+     */
+    public function getArticleBySlug(string $slug, Request $request): array
+    {
+        $article = $this->articleRepository->findBySlug($slug);
+
+        if (!$article) {
+            throw new HttpNotFoundException($request, "Article not found");
+        }
+
+        return $this->decodeCategories([$article])[0];
+    }
+
+    /**
      * Vytvorí nový článok
      *
      * @param array $articleData Dáta článku

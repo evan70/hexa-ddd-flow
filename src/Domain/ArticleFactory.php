@@ -36,12 +36,16 @@ class ArticleFactory
             throw new \InvalidArgumentException('Neplatné UUID autora: ' . $authorId);
         }
 
+        // Generovanie slugu z názvu článku
+        $slug = self::createSlug($title);
+
         return [
             'id' => $id ?? UuidGenerator::generate(),
             'title' => $title,
             'content' => $content,
             'type' => $type,
             'author_id' => $authorId,
+            'slug' => $slug,
             'created_at' => date('Y-m-d H:i:s'),
             'updated_at' => date('Y-m-d H:i:s')
         ];
@@ -76,6 +80,36 @@ class ArticleFactory
 
         $data['updated_at'] = date('Y-m-d H:i:s');
 
+        // Generovanie slugu, ak chýba a máme názov
+        if (!isset($data['slug']) && isset($data['title'])) {
+            $data['slug'] = self::createSlug($data['title']);
+        }
+
         return $data;
+    }
+
+    /**
+     * Vytvorí slug z reťazca
+     *
+     * @param string $text
+     * @return string
+     */
+    public static function createSlug(string $text): string {
+        // Konverzia na malé písmená
+        $text = mb_strtolower($text, 'UTF-8');
+
+        // Nahradenie diakritiky
+        $text = iconv('UTF-8', 'ASCII//TRANSLIT', $text);
+
+        // Odstránenie všetkých znakov okrem písmen, číslic a pomlčiek
+        $text = preg_replace('/[^a-z0-9-]/', '-', $text);
+
+        // Nahradenie viacerých pomlčiek jednou
+        $text = preg_replace('/-+/', '-', $text);
+
+        // Odstránenie pomlčiek na začiatku a konci
+        $text = trim($text, '-');
+
+        return $text;
     }
 }

@@ -30,12 +30,12 @@ class DatabaseSettingsRepository implements SettingsRepositoryInterface
     {
         $stmt = $this->pdo->query('SELECT * FROM settings');
         $settings = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        
+
         $result = [];
         foreach ($settings as $setting) {
             $result[$setting['key']] = $setting['value'];
         }
-        
+
         return $result;
     }
 
@@ -49,9 +49,9 @@ class DatabaseSettingsRepository implements SettingsRepositoryInterface
     {
         $stmt = $this->pdo->prepare('SELECT value FROM settings WHERE key = :key');
         $stmt->execute(['key' => $key]);
-        
+
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
-        
+
         return $result ? $result['value'] : null;
     }
 
@@ -65,11 +65,11 @@ class DatabaseSettingsRepository implements SettingsRepositoryInterface
     public function set(string $key, string $value): bool
     {
         $now = date('Y-m-d H:i:s');
-        
+
         // Kontrola, či nastavenie už existuje
         $stmt = $this->pdo->prepare('SELECT id FROM settings WHERE key = :key');
         $stmt->execute(['key' => $key]);
-        
+
         if ($stmt->fetch(PDO::FETCH_ASSOC)) {
             // Aktualizácia existujúceho nastavenia
             $stmt = $this->pdo->prepare('
@@ -77,7 +77,7 @@ class DatabaseSettingsRepository implements SettingsRepositoryInterface
                 SET value = :value, updated_at = :updated_at 
                 WHERE key = :key
             ');
-            
+
             return $stmt->execute([
                 'key' => $key,
                 'value' => $value,
@@ -89,7 +89,7 @@ class DatabaseSettingsRepository implements SettingsRepositoryInterface
                 INSERT INTO settings (key, value, created_at, updated_at)
                 VALUES (:key, :value, :created_at, :updated_at)
             ');
-            
+
             return $stmt->execute([
                 'key' => $key,
                 'value' => $value,

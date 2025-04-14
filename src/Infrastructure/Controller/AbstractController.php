@@ -40,7 +40,7 @@ abstract class AbstractController
                 $article['categories'] = [];
             }
         }
-        
+
         return $articles;
     }
 

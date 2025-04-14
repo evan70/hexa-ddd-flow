@@ -64,14 +64,14 @@ class SettingsService
     public function setMultiple(array $settings): bool
     {
         $success = true;
-        
+
         foreach ($settings as $key => $value) {
             $result = $this->settingsRepository->set($key, $value);
             if (!$result) {
                 $success = false;
             }
         }
-        
+
         return $success;
     }
 

@@ -92,8 +92,8 @@ class DatabaseArticleRepository implements ArticleRepositoryInterface
                 return $articleData['id'];
             } else {
                 // Insert new article
-                $sql = 'INSERT INTO articles (id, title, content, type, author_id, created_at, updated_at)
-                        VALUES (:id, :title, :content, :type, :author_id, :created_at, :updated_at)';
+                $sql = 'INSERT INTO articles (id, title, content, type, author_id, slug, created_at, updated_at)
+                        VALUES (:id, :title, :content, :type, :author_id, :slug, :created_at, :updated_at)';
 
                 $statement = $this->pdo->prepare($sql);
                 $statement->execute([
@@ -102,6 +102,7 @@ class DatabaseArticleRepository implements ArticleRepositoryInterface
                     'content' => $articleData['content'],
                     'type' => $articleData['type'],
                     'author_id' => $articleData['author_id'],
+                    'slug' => $articleData['slug'] ?? '',
                     'created_at' => $articleData['created_at'],
                     'updated_at' => $articleData['updated_at']
                 ]);
@@ -143,7 +144,7 @@ class DatabaseArticleRepository implements ArticleRepositoryInterface
         $articles = $statement->fetchAll(PDO::FETCH_ASSOC);
 
         // Filtrujeme výsledky, aby sme mali len články, ktoré naozaj obsahujú danú kategóriu
-        return array_filter($articles, function($article) use ($category) {
+        return array_filter($articles, function ($article) use ($category) {
             $categories = json_decode($article['categories'], true);
             return in_array($category, $categories);
         });
@@ -202,5 +203,21 @@ class DatabaseArticleRepository implements ArticleRepositoryInterface
         }
 
         return $tags;
+    }
+
+    /**
+     * Nájde článok podľa slugu
+     *
+     * @param string $slug Slug článku
+     * @return array|null Dáta článku alebo null, ak článok neexistuje
+     */
+    public function findBySlug(string $slug): ?array
+    {
+        $statement = $this->pdo->prepare('SELECT * FROM articles WHERE slug = :slug');
+        $statement->execute(['slug' => $slug]);
+
+        $article = $statement->fetch(PDO::FETCH_ASSOC);
+
+        return $article ?: null;
     }
 }

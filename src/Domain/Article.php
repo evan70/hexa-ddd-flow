@@ -15,7 +15,7 @@ class Article
     public const TYPE_ARTICLE = 'article';
     public const TYPE_PRODUCT = 'product';
     public const TYPE_PAGE = 'page';
-    
+
     /**
      * Overí, či je typ článku platný
      *
@@ -30,7 +30,7 @@ class Article
             self::TYPE_PAGE
         ]);
     }
-    
+
     /**
      * Vráti všetky dostupné typy článkov
      *
