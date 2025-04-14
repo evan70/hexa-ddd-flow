@@ -41,34 +41,39 @@ class CsrfMiddleware implements MiddlewareInterface
     {
         $method = $request->getMethod();
         $path = $request->getUri()->getPath();
-        
+
         // Kontrola, či je cesta vylúčená z CSRF ochrany
         foreach ($this->excludedRoutes as $excludedRoute) {
             if (strpos($path, $excludedRoute) === 0) {
                 return $handler->handle($request);
             }
         }
-        
+
+        // Dočasne vypnutie CSRF ochrany pre prihlasovací formulár
+        if ($path === '/login') {
+            return $handler->handle($request);
+        }
+
         // Kontrola CSRF tokenu len pre POST, PUT, DELETE a PATCH požiadavky
         if (in_array($method, ['POST', 'PUT', 'DELETE', 'PATCH'])) {
             $parsedBody = $request->getParsedBody();
-            
+
             // Kontrola, či je token v požiadavke
             if (!isset($parsedBody['csrf_token'])) {
                 return $this->createErrorResponse('CSRF token chýba.');
             }
-            
+
             $token = $parsedBody['csrf_token'];
-            
+
             // Kontrola platnosti tokenu
             if (!$this->csrfService->validate($token)) {
                 return $this->createErrorResponse('Neplatný CSRF token.');
             }
         }
-        
+
         return $handler->handle($request);
     }
-    
+
     /**
      * Vytvorí chybovú odpoveď
      *
@@ -80,7 +85,7 @@ class CsrfMiddleware implements MiddlewareInterface
         $responseFactory = new ResponseFactory();
         $response = $responseFactory->createResponse(403);
         $response->getBody()->write(json_encode(['error' => $message]));
-        
+
         return $response->withHeader('Content-Type', 'application/json');
     }
 }

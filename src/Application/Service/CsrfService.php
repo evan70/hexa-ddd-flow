@@ -97,30 +97,43 @@ class CsrfService
      */
     public function validateToken(Request $request, string $token): bool
     {
+        error_log('Overujem token: ' . $token);
         $cookies = $request->getCookieParams();
 
         // Ak nie je nastavená cookie, token nie je platný
         if (!isset($cookies[$this->cookieName])) {
+            error_log('Session cookie nie je nastavená');
             return false;
         }
 
         $sessionId = $cookies[$this->cookieName];
+        error_log('Session ID: ' . $sessionId);
         $session = $this->sessionRepository->get($sessionId);
 
         // Ak session neexistuje alebo neobsahuje CSRF token, token nie je platný
-        if (!$session || !isset($session['data'][$this->tokenName])) {
+        if (!$session) {
+            error_log('Session neexistuje');
+            return false;
+        }
+
+        if (!isset($session['data'][$this->tokenName])) {
+            error_log('Session neobsahuje CSRF token');
             return false;
         }
 
         $tokenData = $session['data'][$this->tokenName];
+        error_log('Token v session: ' . $tokenData['token']);
 
         // Kontrola expirácie tokenu
         if (time() > $tokenData['expires']) {
+            error_log('Token vypršal');
             return false;
         }
 
         // Kontrola tokenu
-        return hash_equals($tokenData['token'], $token);
+        $result = hash_equals($tokenData['token'], $token);
+        error_log('Výsledok porovnania: ' . ($result ? 'true' : 'false'));
+        return $result;
     }
 
     /**
@@ -140,6 +153,16 @@ class CsrfService
 
             if ($session) {
                 $sessionData = $session['data'];
+
+                // Ak už existuje token a je platný, vrátime ho
+                if (isset($sessionData[$this->tokenName]) &&
+                    isset($sessionData[$this->tokenName]['token']) &&
+                    isset($sessionData[$this->tokenName]['expires']) &&
+                    time() < $sessionData[$this->tokenName]['expires']) {
+
+                    error_log('Používam existujúci token: ' . $sessionData[$this->tokenName]['token']);
+                    return $sessionData[$this->tokenName]['token'];
+                }
             } else {
                 // Session ID existuje, ale session nie je v databáze
                 $sessionId = null;
@@ -163,11 +186,12 @@ class CsrfService
             );
 
             // Vytvorenie novej session
-            $this->sessionRepository->create($sessionId, null, $sessionData);
+            $this->sessionRepository->create($sessionId, $sessionData);
         }
 
         // Generovanie náhodného tokenu
         $token = bin2hex(random_bytes(32));
+        error_log('Generujem nový token: ' . $token);
 
         // Uloženie tokenu do session
         $sessionData[$this->tokenName] = [
@@ -188,27 +212,52 @@ class CsrfService
      */
     public function validate(string $token): bool
     {
+        error_log('Overujem token (middleware): ' . $token);
+
         // Ak nie je nastavená cookie, token nie je platný
         if (!isset($_COOKIE[$this->cookieName])) {
+            error_log('Session cookie nie je nastavená (middleware)');
             return false;
         }
 
         $sessionId = $_COOKIE[$this->cookieName];
+        error_log('Session ID (middleware): ' . $sessionId);
         $session = $this->sessionRepository->get($sessionId);
 
         // Ak session neexistuje alebo neobsahuje CSRF token, token nie je platný
-        if (!$session || !isset($session['data'][$this->tokenName])) {
+        if (!$session) {
+            error_log('Session neexistuje (middleware)');
+            return false;
+        }
+
+        if (!isset($session['data'][$this->tokenName])) {
+            error_log('Session neobsahuje CSRF token (middleware)');
             return false;
         }
 
         $tokenData = $session['data'][$this->tokenName];
+        error_log('Token v session (middleware): ' . $tokenData['token']);
 
         // Kontrola expirácie tokenu
         if (time() > $tokenData['expires']) {
+            error_log('Token vypršal (middleware)');
             return false;
         }
 
         // Kontrola tokenu
-        return hash_equals($tokenData['token'], $token);
+        $result = hash_equals($tokenData['token'], $token);
+        error_log('Výsledok porovnania (middleware): ' . ($result ? 'true' : 'false'));
+        return $result;
+    }
+
+    /**
+     * Získa session podľa ID
+     *
+     * @param string $sessionId ID session
+     * @return array|null Session alebo null, ak session neexistuje
+     */
+    public function getSession(string $sessionId): ?array
+    {
+        return $this->sessionRepository->get($sessionId);
     }
 }

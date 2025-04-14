@@ -70,7 +70,33 @@ class AuthController extends AbstractController
         }
 
         // Kontrola CSRF tokenu
-        if (!isset($data['csrf_token']) || !$this->csrfService->validateToken($request, $data['csrf_token'])) {
+        if (!isset($data['csrf_token'])) {
+            return $this->render($response, 'auth/login.twig', [
+                'error' => 'Chýba bezpečnostný token.'
+            ]);
+        }
+
+        // Vypíšeme token pre debug
+        error_log('CSRF token z formulára: ' . $data['csrf_token']);
+
+        // Získame session ID
+        $cookies = $request->getCookieParams();
+        if (isset($cookies['session_id'])) {
+            $sessionId = $cookies['session_id'];
+            error_log('Session ID: ' . $sessionId);
+
+            // Získame session
+            $session = $this->csrfService->getSession($sessionId);
+            if ($session && isset($session['data']['csrf_token'])) {
+                error_log('CSRF token v session: ' . $session['data']['csrf_token']['token']);
+            } else {
+                error_log('Session neobsahuje CSRF token');
+            }
+        } else {
+            error_log('Session ID nie je nastavené');
+        }
+
+        if (!$this->csrfService->validateToken($request, $data['csrf_token'])) {
             return $this->render($response, 'auth/login.twig', [
                 'error' => 'Neplatný bezpečnostný token. Skúste to znova.'
             ]);
