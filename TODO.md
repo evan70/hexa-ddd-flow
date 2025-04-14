@@ -28,10 +28,10 @@
 - [ ] Vytvoriť agregáty pre komplexné doménové operácie
 
 ## 4. Rozšírenie testovania
-- [ ] Nastaviť PHPUnit pre testovanie
-- [ ] Implementovať unit testy pre doménové triedy
-- [ ] Implementovať unit testy pre služby
-- [ ] Vytvoriť integračné testy pre repozitáre
+- [x] Nastaviť PHPUnit pre testovanie
+- [x] Implementovať unit testy pre doménové triedy
+- [x] Implementovať unit testy pre služby
+- [x] Vytvoriť integračné testy pre repozitáre
 - [ ] Implementovať end-to-end testy pre API
 
 ## 5. Vylepšenie používateľského rozhrania
@@ -69,6 +69,8 @@
 - [ ] Implementovať automatické nasadenie
 
 ## Prioritné úlohy pre najbližšie obdobie
-1. Dokončiť implementáciu služieb
-2. Implementovať autentifikáciu a autorizáciu
-3. Rozšíriť testovanie
+1. ~~Dokončiť implementáciu služieb~~ ✅
+2. ~~Implementovať autentifikáciu a autorizáciu~~ ✅
+3. ~~Rozšíriť testovanie~~ ✅
+4. Zlepšiť doménovú vrstvu
+5. Vylepšiť používateľské rozhranie
