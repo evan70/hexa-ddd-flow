@@ -269,6 +269,11 @@ return function (ContainerBuilder $containerBuilder) {
         },
 
         Guard::class => function (ContainerInterface $c) {
+            // Spustenie session, ak ešte nie je spustená
+            if (session_status() === PHP_SESSION_NONE) {
+                session_start();
+            }
+
             $responseFactory = new \Slim\Psr7\Factory\ResponseFactory();
             $guard = new Guard($responseFactory);
 

@@ -32,7 +32,7 @@ use App\Infrastructure\Middleware\UuidValidatorMiddleware;
 use App\Infrastructure\Middleware\CsrfMiddleware;
 use App\Infrastructure\Middleware\SessionMiddleware;
 use App\Infrastructure\Middleware\SlimCsrfMiddleware;
-use Slim\Session\Middleware\SessionMiddleware as SlimSessionMiddleware;
+use Slim\Middleware\Session as SlimSessionMiddleware;
 use DI\ContainerBuilder;
 use Slim\Factory\AppFactory;
 use Slim\Views\Twig;
