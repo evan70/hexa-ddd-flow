@@ -1,4 +1,18 @@
-@import "tailwindcss";
+@theme {
+  --color-primary: 120 67 233;
+  --color-primary-dark: 92 45 204;
+  --color-primary-light: 154 109 240;
+  --color-secondary: 236 65 118;
+  --color-background: 255 255 255;
+  --color-surface: 248 250 252;
+  --color-text: 30 41 59;
+  --color-text-light: 100 116 139;
+  --color-border: 226 232 240;
+}
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 /* Custom styles */
 @layer base {

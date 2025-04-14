@@ -1,6 +1,8 @@
 // tailwind.config.js
 import tailwindcss from 'tailwindcss'
 import defaultTheme from 'tailwindcss/defaultTheme'
+import forms from '@tailwindcss/forms'
+import typography from '@tailwindcss/typography'
 
 export default {
   content: [
@@ -56,5 +58,9 @@ export default {
         primary: theme('colors.primary.ring')
       })
     }
-  }
+  },
+  plugins: [
+    forms,
+    typography
+  ]
 }
