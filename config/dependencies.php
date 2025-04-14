@@ -14,7 +14,6 @@ use App\Infrastructure\Controller\AbstractController;
 use App\Infrastructure\Twig\UuidExtension;
 use App\Infrastructure\Middleware\AuthMiddleware;
 use App\Infrastructure\Middleware\CsrfMiddleware;
-use App\Infrastructure\Middleware\SessionMiddleware;
 use App\Infrastructure\Middleware\SlimCsrfMiddleware;
 use App\Infrastructure\Persistence\DatabaseSessionRepository;
 use App\Ports\UserRepositoryInterface;
@@ -258,13 +257,63 @@ return function (ContainerBuilder $containerBuilder) {
         },
 
         Guard::class => function (ContainerInterface $c) {
-            // Spustenie session, ak ešte nie je spustená
-            if (session_status() === PHP_SESSION_NONE) {
-                session_start();
-            }
+            // Vytvorenie vlastného úložiska pre CSRF tokeny
+            $storage = new class($c->get(SessionRepositoryInterface::class)) implements \ArrayAccess {
+                private $sessionRepository;
+                private $sessionId;
+                private $data = [];
+
+                public function __construct($sessionRepository) {
+                    $this->sessionRepository = $sessionRepository;
+
+                    // Získanie session ID z cookie
+                    if (isset($_COOKIE['session_id'])) {
+                        $this->sessionId = $_COOKIE['session_id'];
+                        $session = $this->sessionRepository->get($this->sessionId);
+
+                        if ($session && isset($session['data']['csrf'])) {
+                            $this->data = $session['data']['csrf'];
+                        }
+                    }
+                }
+
+                public function offsetExists($offset): bool {
+                    return isset($this->data[$offset]);
+                }
+
+                public function offsetGet($offset): mixed {
+                    return $this->data[$offset] ?? null;
+                }
+
+                public function offsetSet($offset, $value): void {
+                    $this->data[$offset] = $value;
+
+                    if ($this->sessionId) {
+                        $session = $this->sessionRepository->get($this->sessionId);
+                        if ($session) {
+                            $sessionData = $session['data'];
+                            $sessionData['csrf'] = $this->data;
+                            $this->sessionRepository->update($this->sessionId, $sessionData);
+                        }
+                    }
+                }
+
+                public function offsetUnset($offset): void {
+                    unset($this->data[$offset]);
+
+                    if ($this->sessionId) {
+                        $session = $this->sessionRepository->get($this->sessionId);
+                        if ($session) {
+                            $sessionData = $session['data'];
+                            $sessionData['csrf'] = $this->data;
+                            $this->sessionRepository->update($this->sessionId, $sessionData);
+                        }
+                    }
+                }
+            };
 
             $responseFactory = new \Slim\Psr7\Factory\ResponseFactory();
-            $guard = new Guard($responseFactory);
+            $guard = new Guard($responseFactory, 'csrf', 'csrf', null, null, 16, $storage);
 
             // Nastavenie storage handler pre persistenciu tokenov
             $guard->setPersistentTokenMode(true);
@@ -292,8 +341,6 @@ return function (ContainerBuilder $containerBuilder) {
             );
         },
 
-        SessionMiddleware::class => function (ContainerInterface $c) {
-            return new SessionMiddleware();
-        }
+
     ]);
 };
