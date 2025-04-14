@@ -8,7 +8,7 @@
         <h1 class="text-3xl font-bold text-gray-800 dark:text-gray-200">Používatelia</h1>
         <a href="/mark/users/create" class="btn btn-primary">Pridať používateľa</a>
     </div>
-    
+
     <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden transition-theme">
         <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
             <thead class="bg-gray-50 dark:bg-gray-700">
@@ -40,8 +40,8 @@
                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                         <a href="/mark/users/{{ user.id }}" class="text-primary hover:text-primary-dark mr-3">Detail</a>
                         <a href="/mark/users/{{ user.id }}/edit" class="text-primary hover:text-primary-dark mr-3">Upraviť</a>
-                        <a href="#" class="text-red-600 hover:text-red-900" 
-                           onclick="if(confirm('Naozaj chcete vymazať tohto používateľa?')) { fetch('/api/users/{{ user.id }}', {method: 'DELETE'}).then(() => window.location.reload()); } return false;">
+                        <a href="#" class="text-red-600 hover:text-red-900"
+                           onclick="if(confirm('Naozaj chcete vymazať tohto používateľa?')) { fetch('/mark/api/users/{{ user.id }}', {method: 'DELETE'}).then(() => window.location.reload()); } return false;">
                             Vymazať
                         </a>
                     </td>
@@ -50,7 +50,7 @@
             </tbody>
         </table>
     </div>
-    
+
     <div class="mt-6">
         <a href="/mark" class="text-primary hover:text-primary-dark">&larr; Späť na dashboard</a>
     </div>
