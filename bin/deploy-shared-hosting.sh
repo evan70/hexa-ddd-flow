@@ -152,6 +152,65 @@ header('Location: public/');
 EOL
 fi
 
+# Upravenie public/index.php pre shared hosting
+log "Upravujem public/index.php pre shared hosting..."
+cat > $BUILD_DIR/public/index.php << 'EOL'
+<?php
+
+declare(strict_types=1);
+
+// Detekcia cesty k vendor adresáru
+$vendorPaths = [
+    __DIR__ . '/../vendor/autoload.php',           // Štandardná cesta
+    __DIR__ . '/../../vendor/autoload.php',         // O úroveň vyššie
+    __DIR__ . '/../../../vendor/autoload.php',      // O dve úrovne vyššie
+    __DIR__ . '/vendor/autoload.php',               // V public adresári
+    __DIR__ . '/../app/vendor/autoload.php',        // V app adresári
+];
+
+$autoloadPath = null;
+foreach ($vendorPaths as $path) {
+    if (file_exists($path)) {
+        $autoloadPath = $path;
+        break;
+    }
+}
+
+if ($autoloadPath === null) {
+    die('Autoloader not found. Please run "composer install" in the project root.');
+}
+
+// Načítanie autoloadera
+require $autoloadPath;
+
+// Detekcia cesty k boot/app.php
+$bootPaths = [
+    __DIR__ . '/../boot/app.php',           // Štandardná cesta
+    __DIR__ . '/../../boot/app.php',         // O úroveň vyššie
+    __DIR__ . '/../../../boot/app.php',      // O dve úrovne vyššie
+    __DIR__ . '/boot/app.php',               // V public adresári
+    __DIR__ . '/../app/boot/app.php',        // V app adresári
+];
+
+$bootPath = null;
+foreach ($bootPaths as $path) {
+    if (file_exists($path)) {
+        $bootPath = $path;
+        break;
+    }
+}
+
+if ($bootPath === null) {
+    die('Boot file not found. Please check your installation.');
+}
+
+// Načítanie a spustenie aplikácie z boot/app.php
+$app = require $bootPath;
+
+// Spustenie aplikácie
+$app->run();
+EOL
+
 # Vytvorenie súboru s inštrukciami pre nasadenie
 log "Vytváram súbor s inštrukciami pre nasadenie..."
 cat > $BUILD_DIR/README_DEPLOY.txt << 'EOL'
