@@ -32,6 +32,7 @@ use App\Infrastructure\Middleware\UuidValidatorMiddleware;
 use App\Infrastructure\Middleware\CsrfMiddleware;
 use App\Infrastructure\Middleware\SessionMiddleware;
 use App\Infrastructure\Middleware\SlimCsrfMiddleware;
+use Slim\Session\Middleware\SessionMiddleware as SlimSessionMiddleware;
 use DI\ContainerBuilder;
 use Slim\Factory\AppFactory;
 use Slim\Views\Twig;
@@ -67,8 +68,12 @@ $app->add(TwigMiddleware::createFromContainer($app, Twig::class));
 // Pridanie UUID validator middleware
 $app->add($container->get(UuidValidatorMiddleware::class));
 
-// Pridanie Session middleware
-$app->add($container->get(SessionMiddleware::class));
+// Pridanie Slim Session middleware
+$app->add(new SlimSessionMiddleware([
+    'name' => 'slim_session',
+    'autorefresh' => true,
+    'lifetime' => '1 hour'
+]));
 
 // Pridanie CSRF middleware
 $app->add($container->get(SlimCsrfMiddleware::class));

@@ -14,7 +14,6 @@ use App\Infrastructure\Controller\AbstractController;
 use App\Infrastructure\Twig\UuidExtension;
 use App\Infrastructure\Middleware\AuthMiddleware;
 use App\Infrastructure\Middleware\CsrfMiddleware;
-use App\Infrastructure\Middleware\SessionMiddleware;
 use App\Infrastructure\Middleware\SlimCsrfMiddleware;
 use App\Infrastructure\Persistence\DatabaseSessionRepository;
 use App\Infrastructure\Persistence\DatabaseSettingsRepository;
@@ -270,11 +269,6 @@ return function (ContainerBuilder $containerBuilder) {
         },
 
         Guard::class => function (ContainerInterface $c) {
-            // Spustenie session, ak ešte nie je spustená
-            if (session_status() === PHP_SESSION_NONE) {
-                session_start();
-            }
-
             $responseFactory = new \Slim\Psr7\Factory\ResponseFactory();
             $guard = new Guard($responseFactory);
 
@@ -282,7 +276,8 @@ return function (ContainerBuilder $containerBuilder) {
             $guard->setPersistentTokenMode(true);
 
             // Nastavenie error handlera
-            $guard->setFailureHandler(function (\Psr\Http\Message\ServerRequestInterface $request, \Psr\Http\Message\ResponseInterface $response, $next) {
+            $guard->setFailureHandler(function (\Psr\Http\Message\ServerRequestInterface $request, $handler) {
+                // Vytvorenie chybovej odpovede
                 $response = new \Slim\Psr7\Response();
                 $response->getBody()->write(json_encode([
                     'error' => 'Neplatný CSRF token.'
@@ -304,9 +299,7 @@ return function (ContainerBuilder $containerBuilder) {
             );
         },
 
-        SessionMiddleware::class => function (ContainerInterface $c) {
-            return new SessionMiddleware();
-        },
+
 
     ]);
 };

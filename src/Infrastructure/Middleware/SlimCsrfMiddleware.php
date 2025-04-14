@@ -45,14 +45,14 @@ class SlimCsrfMiddleware implements MiddlewareInterface
     public function process(Request $request, RequestHandler $handler): Response
     {
         $path = $request->getUri()->getPath();
-        
+
         // Kontrola, či je cesta vylúčená z CSRF ochrany
         foreach ($this->excludedRoutes as $excludedRoute) {
             if (strpos($path, $excludedRoute) === 0) {
                 return $handler->handle($request);
             }
         }
-        
+
         // Pridanie CSRF tokenov do Twig
         $this->twig->getEnvironment()->addGlobal('csrf', [
             'keys' => [
@@ -62,8 +62,15 @@ class SlimCsrfMiddleware implements MiddlewareInterface
             'name' => $this->csrf->getTokenName(),
             'value' => $this->csrf->getTokenValue()
         ]);
-        
-        // Spracovanie požiadavky cez CSRF Guard
-        return $this->csrf->process($request, $handler);
+
+        try {
+            // Spracovanie požiadavky cez CSRF Guard
+            return $this->csrf->process($request, $handler);
+        } catch (\Exception $e) {
+            // V prípade chyby presmerujeme na predchádzajúcu stránku
+            $referer = $request->getHeaderLine('HTTP_REFERER') ?: '/';
+            $response = new \Slim\Psr7\Response();
+            return $response->withHeader('Location', $referer)->withStatus(302);
+        }
     }
 }
