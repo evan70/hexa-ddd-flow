@@ -9,6 +9,7 @@ use App\Infrastructure\Controller\ArticleController;
 use App\Infrastructure\Controller\AuthController;
 use App\Infrastructure\Controller\MarkController;
 use App\Infrastructure\Middleware\UuidValidatorMiddleware;
+use App\Infrastructure\Middleware\AuthMiddleware;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\Views\Twig;
