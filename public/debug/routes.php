@@ -3,10 +3,10 @@
 /**
  * Webová verzia skriptu na výpis všetkých dostupných rout v aplikácii
  * Prístupná cez URL: /debug/routes.php
- * 
+ *
  * UPOZORNENIE: Tento súbor by mal byť dostupný len počas vývoja a debugovania.
  * Pred nasadením na produkciu ho odstráňte alebo zabezpečte prístup heslom.
- * 
+ *
  * Autor: Augment Agent
  * Dátum: <?= date('Y-m-d') ?>
  */
@@ -21,7 +21,7 @@ if (file_exists(__DIR__ . '/../../config/settings.php')) {
 // Ak je skript spustený v produkčnom prostredí, vyžadujeme heslo
 if ($isProduction) {
     $debugPassword = $_ENV['DEBUG_PASSWORD'] ?? 'debug123'; // Predvolené heslo, zmeňte ho!
-    
+
     if (!isset($_SERVER['PHP_AUTH_USER']) || $_SERVER['PHP_AUTH_PW'] !== $debugPassword) {
         header('WWW-Authenticate: Basic realm="Debug Area"');
         header('HTTP/1.0 401 Unauthorized');
@@ -33,19 +33,8 @@ if ($isProduction) {
 // Načítanie autoloadera
 require __DIR__ . '/../../vendor/autoload.php';
 
-// Načítanie nastavení
-$settings = require __DIR__ . '/../../config/settings.php';
-
-// Vytvorenie DI kontajnera
-$containerBuilder = new \DI\ContainerBuilder();
-$containerBuilder->addDefinitions(__DIR__ . '/../../config/dependencies.php');
-$container = $containerBuilder->build();
-
-// Vytvorenie aplikácie
-$app = \DI\Bridge\Slim\Bridge::create($container);
-
-// Načítanie rout
-require __DIR__ . '/../../config/routes.php';
+// Vytvorenie aplikácie rovnakým spôsobom ako v boot/app.php
+$app = require __DIR__ . '/../../boot/app.php';
 
 // Získanie rout
 $routes = $app->getRouteCollector()->getRoutes();
@@ -175,11 +164,11 @@ ksort($routesByPath);
 </head>
 <body>
     <h1>Zoznam dostupných rout</h1>
-    
+
     <div class="search">
         <input type="text" id="searchInput" placeholder="Vyhľadávanie rout..." onkeyup="filterRoutes()">
     </div>
-    
+
     <table id="routesTable">
         <thead>
             <tr>
@@ -224,13 +213,13 @@ ksort($routesByPath);
             <?php endforeach; ?>
         </tbody>
     </table>
-    
+
     <div class="summary">
         <h2>Súhrn</h2>
-        
+
         <p><strong>Celkový počet rout:</strong> <?= count($routes) ?></p>
         <p><strong>Celkový počet unikátnych ciest:</strong> <?= count($routesByPath) ?></p>
-        
+
         <h3>Počet rout podľa metódy:</h3>
         <ul>
             <?php
@@ -244,7 +233,7 @@ ksort($routesByPath);
                     $routesByMethod[$method]++;
                 }
             }
-            
+
             foreach ($routesByMethod as $method => $count):
             ?>
                 <li>
@@ -253,27 +242,27 @@ ksort($routesByPath);
             <?php endforeach; ?>
         </ul>
     </div>
-    
+
     <script>
         function filterRoutes() {
             const input = document.getElementById('searchInput');
             const filter = input.value.toLowerCase();
             const table = document.getElementById('routesTable');
             const rows = table.getElementsByTagName('tr');
-            
+
             for (let i = 1; i < rows.length; i++) {
                 const cells = rows[i].getElementsByTagName('td');
                 let found = false;
-                
+
                 for (let j = 0; j < cells.length; j++) {
                     const cellText = cells[j].textContent || cells[j].innerText;
-                    
+
                     if (cellText.toLowerCase().indexOf(filter) > -1) {
                         found = true;
                         break;
                     }
                 }
-                
+
                 rows[i].style.display = found ? '' : 'none';
             }
         }

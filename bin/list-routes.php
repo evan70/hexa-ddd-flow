@@ -2,10 +2,10 @@
 
 /**
  * Skript na výpis všetkých dostupných rout v aplikácii
- * 
+ *
  * Použitie:
  * php bin/list-routes.php
- * 
+ *
  * Autor: Augment Agent
  * Dátum: <?= date('Y-m-d') ?>
  */
@@ -13,19 +13,8 @@
 // Načítanie autoloadera
 require __DIR__ . '/../vendor/autoload.php';
 
-// Načítanie nastavení
-$settings = require __DIR__ . '/../config/settings.php';
-
-// Vytvorenie DI kontajnera
-$containerBuilder = new \DI\ContainerBuilder();
-$containerBuilder->addDefinitions(__DIR__ . '/../config/dependencies.php');
-$container = $containerBuilder->build();
-
-// Vytvorenie aplikácie
-$app = \DI\Bridge\Slim\Bridge::create($container);
-
-// Načítanie rout
-require __DIR__ . '/../config/routes.php';
+// Vytvorenie aplikácie rovnakým spôsobom ako v boot/app.php
+$app = require __DIR__ . '/../boot/app.php';
 
 // Získanie rout
 $routes = $app->getRouteCollector()->getRoutes();
@@ -64,14 +53,14 @@ echo str_repeat("-", 120) . "\n";
 foreach ($routesByPath as $path => $pathRoutes) {
     foreach ($pathRoutes as $route) {
         $methods = $route->getMethods();
-        
+
         foreach ($methods as $method) {
             $color = $colors[$method] ?? $colors['reset'];
-            
+
             echo $color . str_pad($method, 10) . $colors['reset'] . " | ";
             echo str_pad($path, 50) . " | ";
             echo str_pad($route->getName() ?: '-', 20) . " | ";
-            
+
             // Získanie handlera
             $callable = $route->getCallable();
             if (is_string($callable)) {
@@ -87,7 +76,7 @@ foreach ($routesByPath as $path => $pathRoutes) {
             } else {
                 echo 'Unknown';
             }
-            
+
             echo "\n";
         }
     }
