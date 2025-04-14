@@ -18,7 +18,7 @@
 - [x] Implementovať prihlasovanie a odhlasovanie používateľov
 - [x] Vytvoriť middleware pre kontrolu autentifikácie
 - [x] Implementovať autorizáciu na základe rolí používateľov
-- [ ] Pridať ochranu proti CSRF útokom
+- [x] Pridať ochranu proti CSRF útokom
 - [x] Vytvoriť stránky pre prihlásenie a registráciu
 
 ## 3. Zlepšenie doménovej vrstvy

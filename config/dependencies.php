@@ -12,6 +12,7 @@ use App\Infrastructure\Controller\AuthController;
 use App\Infrastructure\Controller\AbstractController;
 use App\Infrastructure\Twig\UuidExtension;
 use App\Infrastructure\Middleware\AuthMiddleware;
+use App\Infrastructure\Middleware\CsrfMiddleware;
 use App\Infrastructure\Persistence\DatabaseSessionRepository;
 use App\Ports\UserRepositoryInterface;
 use App\Ports\ArticleRepositoryInterface;
@@ -19,6 +20,7 @@ use App\Ports\SessionRepositoryInterface;
 use App\Application\Service\ArticleService;
 use App\Application\Service\UserService;
 use App\Application\Service\AuthService;
+use App\Application\Service\CsrfService;
 use DI\ContainerBuilder;
 use Psr\Container\ContainerInterface;
 use Slim\Views\Twig;
@@ -85,6 +87,9 @@ return function (ContainerBuilder $containerBuilder) {
 
             // Pridanie AuthService do Twig
             $twig->getEnvironment()->addGlobal('auth', $c->get(AuthService::class));
+
+            // Pridanie CsrfService do Twig
+            $twig->getEnvironment()->addGlobal('csrf', $c->get(CsrfService::class));
 
             // Pridanie Twig extensions
             $twig->addExtension(new UuidExtension());
@@ -208,9 +213,19 @@ return function (ContainerBuilder $containerBuilder) {
             );
         },
 
+        CsrfService::class => function (ContainerInterface $c) {
+            return new CsrfService(
+                $c->get(SessionRepositoryInterface::class),
+                'session_id',
+                'csrf_token',
+                3600 // 1 hodina
+            );
+        },
+
         AuthController::class => function (ContainerInterface $c) {
             return new AuthController(
                 $c->get(AuthService::class),
+                $c->get(CsrfService::class),
                 $c->get(Twig::class)
             );
         },
@@ -220,6 +235,13 @@ return function (ContainerBuilder $containerBuilder) {
                 $c->get(AuthService::class),
                 [],
                 '/login'
+            );
+        },
+
+        CsrfMiddleware::class => function (ContainerInterface $c) {
+            return new CsrfMiddleware(
+                $c->get(CsrfService::class),
+                ['/api'] // Cesty vylúčené z CSRF ochrany
             );
         }
     ]);
