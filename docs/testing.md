@@ -99,21 +99,30 @@ Pri spustení príkazu `composer test:all` uvidíte podobný výstup:
 
 === TESTY ===
 
-PHPUnit 10.5.0 by Sebastian Bergmann and contributors.
+Time: 00:00.032, Memory: 10.00 MB
 
-App\Domain\Article
- ✓ Create article
- ✓ Validate article data
- ✓ Get article by id
+Article (Tests\Unit\Domain\Article)
+ ✔ Is valid type
+ ✔ Get types
+ ✔ Constants
 
-App\Infrastructure\Persistence\DatabaseArticleRepository
- ✓ Save article
- ✓ Find article by id
- ✓ Find article by slug
+Article Service (Tests\Unit\Application\Service\ArticleService)
+ ✔ Get all articles
+ ✔ Get article by id
+ ✔ Get article by id throws exception when article not found
+ ✔ Get all categories
+ ✔ Get all tags
 
-Time: 00:00.579, Memory: 12.00 MB
+... (skrátené pre prehľadnosť) ...
 
-OK (6 tests, 11 assertions)
+Uuid (Tests\Unit\Domain\ValueObject\Uuid)
+ ✔ Constructor with valid uuid
+ ✔ Constructor with invalid uuid
+ ✔ Generate
+ ✔ To string
+ ✔ Equals
+
+OK (39 tests, 105 assertions)
 
 ✓ Testy: Všetky testy prešli
 
