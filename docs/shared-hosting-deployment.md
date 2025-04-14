@@ -23,7 +23,24 @@ Bash skript vytvorí dva archívy:
 
 PHP skript vytvorí len ZIP archív `build_shared_hosting.zip`.
 
-Oba archívy obsahujú všetky potrebné súbory pre nasadenie na shared hosting.
+Oba archívy obsahujú všetky potrebné súbory pre nasadenie na shared hosting, pričom:
+
+- Obsahujú len produkčné závislosti (bez vývojových balíkov)
+- Majú optimalizovaný autoloader pre lepší výkon
+- Majú nastavený produkčný mód (vypnuté zobrazovanie chýb, zapnuté logovanie)
+
+## Produkčné nastavenia
+
+Skripty automaticky nastavia nasledujúce produkčné nastavenia:
+
+1. **Optimalizácia závislostí**
+   - Inštalácia len produkčných závislostí (`--no-dev`)
+   - Optimalizácia autoloadera (`--optimize-autoloader`)
+
+2. **Nastavenie produkčného módu**
+   - Vypnutie zobrazovania chýb (`displayErrorDetails => false`)
+   - Zapnutie logovania chýb (`logErrors => true`)
+   - Zapnutie logovania detailov chýb (`logErrorDetails => true`)
 
 ## Obsah archívu
 

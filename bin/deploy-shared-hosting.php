@@ -2,7 +2,7 @@
 
 /**
  * Skript pre nasadenie aplikácie na shared hosting
- * Autor: Augment Agent
+ * Autor: evan70
  * Dátum: <?= date('Y-m-d') ?>
  */
 
@@ -20,9 +20,33 @@ if (is_dir($buildDir)) {
 }
 mkdir($buildDir, 0755, true);
 
+// Kopírovanie composer súborov
+echo "INFO: Kopírujem composer súbory...\n";
+$files = ['composer.json', 'composer.lock'];
+foreach ($files as $file) {
+    if (file_exists($file)) {
+        copy($file, $buildDir . '/' . $file);
+    }
+}
+
+// Inštalácia produkčných závislostí
+echo "INFO: Inštalujem produkčné závislosti...\n";
+$currentDir = getcwd();
+chdir($buildDir);
+$output = [];
+$returnVar = 0;
+exec('composer install --no-dev --optimize-autoloader --quiet', $output, $returnVar);
+chdir($currentDir);
+
+if ($returnVar !== 0) {
+    echo "ERROR: Nepodarilo sa nainštalovať závislosti. Skontrolujte, či máte nainštalovaný Composer.\n";
+    removeDirectory($buildDir);
+    exit(1);
+}
+
 // Kopírovanie potrebných súborov a adresárov
 echo "INFO: Kopírujem potrebné súbory a adresáre...\n";
-$directories = ['public', 'src', 'config', 'boot', 'resources', 'vendor'];
+$directories = ['public', 'src', 'config', 'boot', 'resources'];
 foreach ($directories as $dir) {
     if (is_dir($dir)) {
         copyDirectory($dir, $buildDir . '/' . $dir);
@@ -39,12 +63,15 @@ foreach ($optionalDirs as $dir) {
     }
 }
 
-// Kopírovanie súborov
-$files = ['composer.json', 'composer.lock'];
-foreach ($files as $file) {
-    if (file_exists($file)) {
-        copy($file, $buildDir . '/' . $file);
-    }
+// Nastavenie produkčného módu v settings.php
+echo "INFO: Nastavujem produkčný mód...\n";
+$settingsFile = $buildDir . '/config/settings.php';
+if (file_exists($settingsFile)) {
+    $settings = file_get_contents($settingsFile);
+    $settings = str_replace('"displayErrorDetails" => true', '"displayErrorDetails" => false', $settings);
+    $settings = str_replace('"logErrors" => false', '"logErrors" => true', $settings);
+    $settings = str_replace('"logErrorDetails" => false', '"logErrorDetails" => true', $settings);
+    file_put_contents($settingsFile, $settings);
 }
 
 // Vytvorenie .htaccess súboru pre public adresár, ak neexistuje
@@ -168,13 +195,13 @@ function copyDirectory($source, $destination) {
     if (!is_dir($destination)) {
         mkdir($destination, 0755, true);
     }
-    
+
     $dir = opendir($source);
     while (($file = readdir($dir)) !== false) {
         if ($file != '.' && $file != '..') {
             $srcFile = $source . '/' . $file;
             $destFile = $destination . '/' . $file;
-            
+
             if (is_dir($srcFile)) {
                 copyDirectory($srcFile, $destFile);
             } else {
@@ -192,7 +219,7 @@ function removeDirectory($dir) {
     if (!is_dir($dir)) {
         return;
     }
-    
+
     $objects = scandir($dir);
     foreach ($objects as $object) {
         if ($object != "." && $object != "..") {
@@ -214,7 +241,7 @@ function addDirToZip($zip, $dir, $basePath) {
         new RecursiveDirectoryIterator($dir),
         RecursiveIteratorIterator::LEAVES_ONLY
     );
-    
+
     foreach ($files as $name => $file) {
         if (!$file->isDir()) {
             $filePath = $file->getRealPath();

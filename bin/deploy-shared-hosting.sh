@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Skript pre nasadenie aplikácie na shared hosting
-# Autor: Augment Agent
+# Autor: evan70
 # Dátum: $(date +%Y-%m-%d)
 
 # Farby pre výstup
@@ -43,6 +43,14 @@ BUILD_DIR="build_shared_hosting"
 rm -rf $BUILD_DIR
 mkdir -p $BUILD_DIR
 
+# Inštalácia produkčných závislostí
+log "Inštalujem produkčné závislosti..."
+cp composer.json $BUILD_DIR/
+cp composer.lock $BUILD_DIR/
+cd $BUILD_DIR
+composer install --no-dev --optimize-autoloader --quiet
+cd ..
+
 # Kopírovanie potrebných súborov a adresárov
 log "Kopírujem potrebné súbory a adresáre..."
 cp -r public $BUILD_DIR/
@@ -50,12 +58,18 @@ cp -r src $BUILD_DIR/
 cp -r config $BUILD_DIR/
 cp -r boot $BUILD_DIR/
 cp -r resources $BUILD_DIR/
-cp -r vendor $BUILD_DIR/
-cp -r var $BUILD_DIR/ 2>/dev/null || mkdir -p $BUILD_DIR/var
-cp -r data $BUILD_DIR/ 2>/dev/null || mkdir -p $BUILD_DIR/data
-cp composer.json $BUILD_DIR/
-cp composer.lock $BUILD_DIR/
+# vendor už je nainštalovaný v predchádzajúcom kroku
+mkdir -p $BUILD_DIR/var
+mkdir -p $BUILD_DIR/data
 cp .htaccess $BUILD_DIR/ 2>/dev/null || touch $BUILD_DIR/.htaccess
+
+# Nastavenie produkčného módu v settings.php
+log "Nastavujem produkčný mód..."
+if [ -f "$BUILD_DIR/config/settings.php" ]; then
+    sed -i 's/"displayErrorDetails" => true/"displayErrorDetails" => false/g' "$BUILD_DIR/config/settings.php"
+    sed -i 's/"logErrors" => false/"logErrors" => true/g' "$BUILD_DIR/config/settings.php"
+    sed -i 's/"logErrorDetails" => false/"logErrorDetails" => true/g' "$BUILD_DIR/config/settings.php"
+fi
 
 # Vytvorenie .htaccess súboru pre public adresár, ak neexistuje
 if [ ! -f "$BUILD_DIR/public/.htaccess" ]; then
