@@ -87,18 +87,18 @@ return function (App $app) {
 
         // Používatelia
         $group->get('/users', [MarkController::class, 'users']);
-        $group->get('/users/{id}', [MarkController::class, 'userDetail'])
-            ->add(UuidValidatorMiddleware::class);
         $group->get('/users/create', [MarkController::class, 'createUserForm']);
         $group->get('/users/{id}/edit', [MarkController::class, 'editUserForm'])
+            ->add(UuidValidatorMiddleware::class);
+        $group->get('/users/{id}', [MarkController::class, 'userDetail'])
             ->add(UuidValidatorMiddleware::class);
 
         // Články
         $group->get('/articles', [MarkController::class, 'articles']);
-        $group->get('/articles/{id}', [MarkController::class, 'articleDetail'])
-            ->add(UuidValidatorMiddleware::class);
         $group->get('/articles/create', [MarkController::class, 'createArticleForm']);
         $group->get('/articles/{id}/edit', [MarkController::class, 'editArticleForm'])
+            ->add(UuidValidatorMiddleware::class);
+        $group->get('/articles/{id}', [MarkController::class, 'articleDetail'])
             ->add(UuidValidatorMiddleware::class);
 
         // Nastavenia
