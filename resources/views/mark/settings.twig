@@ -1,0 +1,160 @@
+{% extends "layout.twig" %}
+
+{% block title %}Nastavenia - MarkCMS{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold mb-6 text-gray-800 dark:text-gray-200">Nastavenia</h1>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div class="col-span-1">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 transition-theme">
+                <h2 class="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-200">Navigácia</h2>
+                <nav class="space-y-2">
+                    <a href="#general" class="block px-4 py-2 rounded-md text-primary hover:bg-gray-100 dark:hover:bg-gray-700 transition-theme">Všeobecné nastavenia</a>
+                    <a href="#appearance" class="block px-4 py-2 rounded-md text-primary hover:bg-gray-100 dark:hover:bg-gray-700 transition-theme">Vzhľad</a>
+                    <a href="#seo" class="block px-4 py-2 rounded-md text-primary hover:bg-gray-100 dark:hover:bg-gray-700 transition-theme">SEO</a>
+                    <a href="#advanced" class="block px-4 py-2 rounded-md text-primary hover:bg-gray-100 dark:hover:bg-gray-700 transition-theme">Pokročilé nastavenia</a>
+                </nav>
+            </div>
+        </div>
+
+        <div class="col-span-2">
+            <div id="general" class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-8 transition-theme">
+                <h2 class="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-200">Všeobecné nastavenia</h2>
+
+                <form class="space-y-4" method="POST" action="/mark/settings">
+                    <input type="hidden" name="{{ csrf.keys.name }}" value="{{ csrf.name }}">
+                    <input type="hidden" name="{{ csrf.keys.value }}" value="{{ csrf.value }}">
+
+                    <div>
+                        <label for="site_name" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Názov stránky</label>
+                        <input type="text" id="site_name" name="site_name" value="{{ settings.site_name|default('MarkCMS') }}"
+                               class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:bg-gray-700 dark:text-white transition-theme">
+                    </div>
+
+                    <div>
+                        <label for="site_description" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Popis stránky</label>
+                        <textarea id="site_description" name="site_description" rows="3"
+                                  class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:bg-gray-700 dark:text-white transition-theme">{{ settings.site_description|default('Moderný CMS systém pre vývojárov') }}</textarea>
+                    </div>
+
+                    <div>
+                        <label for="articles_per_page" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Počet článkov na stránku</label>
+                        <input type="number" id="articles_per_page" name="articles_per_page" value="{{ settings.articles_per_page|default('10') }}" min="1" max="100"
+                               class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:bg-gray-700 dark:text-white transition-theme">
+                    </div>
+
+                    <div class="pt-4">
+                        <button type="submit" class="btn btn-primary">Uložiť nastavenia</button>
+                    </div>
+                </form>
+            </div>
+
+            <div id="appearance" class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-8 transition-theme">
+                <h2 class="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-200">Vzhľad</h2>
+
+                <form class="space-y-4" method="POST" action="/mark/settings">
+                    <input type="hidden" name="{{ csrf.keys.name }}" value="{{ csrf.name }}">
+                    <input type="hidden" name="{{ csrf.keys.value }}" value="{{ csrf.value }}">
+
+                    <div>
+                        <label for="theme" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Téma</label>
+                        <select id="theme" name="theme"
+                                class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:bg-gray-700 dark:text-white transition-theme">
+                            <option value="light" {% if settings.theme == 'light' %}selected{% endif %}>Svetlá</option>
+                            <option value="dark" {% if settings.theme == 'dark' %}selected{% endif %}>Tmavá</option>
+                            <option value="auto" {% if settings.theme == 'auto' or settings.theme is not defined %}selected{% endif %}>Automatická (podľa systému)</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="footer_text" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Text v pätičke</label>
+                        <input type="text" id="footer_text" name="footer_text" value="{{ settings.footer_text|default('&copy; ' ~ 'now'|date('Y') ~ ' MarkCMS. Všetky práva vyhradené.') }}"
+                               class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:bg-gray-700 dark:text-white transition-theme">
+                    </div>
+
+                    <div class="pt-4">
+                        <button type="submit" class="btn btn-primary">Uložiť nastavenia</button>
+                    </div>
+                </form>
+            </div>
+
+            <div id="seo" class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-8 transition-theme">
+                <h2 class="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-200">SEO</h2>
+
+                <form class="space-y-4" method="POST" action="/mark/settings">
+                    <input type="hidden" name="{{ csrf.keys.name }}" value="{{ csrf.name }}">
+                    <input type="hidden" name="{{ csrf.keys.value }}" value="{{ csrf.value }}">
+
+                    <div>
+                        <label for="meta_keywords" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Meta kľúčové slová</label>
+                        <input type="text" id="meta_keywords" name="meta_keywords" value="{{ settings.meta_keywords|default('MarkCMS, CMS, PHP, Slim, Framework') }}"
+                               class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:bg-gray-700 dark:text-white transition-theme">
+                        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Oddeľte kľúčové slová čiarkami.</p>
+                    </div>
+
+                    <div>
+                        <label for="meta_author" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Meta autor</label>
+                        <input type="text" id="meta_author" name="meta_author" value="{{ settings.meta_author|default('MarkCMS Team') }}"
+                               class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:bg-gray-700 dark:text-white transition-theme">
+                    </div>
+
+                    <div>
+                        <label for="google_analytics" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Google Analytics ID</label>
+                        <input type="text" id="google_analytics" name="google_analytics" value="{{ settings.google_analytics|default('') }}"
+                               class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:bg-gray-700 dark:text-white transition-theme">
+                        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Napríklad: UA-XXXXX-Y alebo G-XXXXXXXX</p>
+                    </div>
+
+                    <div class="pt-4">
+                        <button type="submit" class="btn btn-primary">Uložiť nastavenia</button>
+                    </div>
+                </form>
+            </div>
+
+            <div id="advanced" class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-8 transition-theme">
+                <h2 class="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-200">Pokročilé nastavenia</h2>
+
+                <form class="space-y-4" method="POST" action="/mark/settings">
+                    <input type="hidden" name="{{ csrf.keys.name }}" value="{{ csrf.name }}">
+                    <input type="hidden" name="{{ csrf.keys.value }}" value="{{ csrf.value }}">
+
+                    <div>
+                        <label for="maintenance_mode" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Režim údržby</label>
+                        <select id="maintenance_mode" name="maintenance_mode"
+                                class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:bg-gray-700 dark:text-white transition-theme">
+                            <option value="false" {% if settings.maintenance_mode == 'false' or settings.maintenance_mode is not defined %}selected{% endif %}>Vypnutý</option>
+                            <option value="true" {% if settings.maintenance_mode == 'true' %}selected{% endif %}>Zapnutý</option>
+                        </select>
+                        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Keď je zapnutý režim údržby, stránka bude dostupná len pre administrátorov.</p>
+                    </div>
+
+                    <div>
+                        <label for="contact_email" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Kontaktný email</label>
+                        <input type="email" id="contact_email" name="contact_email" value="{{ settings.contact_email|default('admin@example.com') }}"
+                               class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:bg-gray-700 dark:text-white transition-theme">
+                    </div>
+
+                    <div>
+                        <label for="enable_comments" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Komentáre</label>
+                        <select id="enable_comments" name="enable_comments"
+                                class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:bg-gray-700 dark:text-white transition-theme">
+                            <option value="true" {% if settings.enable_comments == 'true' or settings.enable_comments is not defined %}selected{% endif %}>Povolené</option>
+                            <option value="false" {% if settings.enable_comments == 'false' %}selected{% endif %}>Zakázané</option>
+                        </select>
+                    </div>
+
+                    <div class="pt-4">
+                        <button type="submit" class="btn btn-primary">Uložiť nastavenia</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-6">
+        <a href="/mark" class="text-primary hover:text-primary-dark">&larr; Späť na dashboard</a>
+    </div>
+</div>
+{% endblock %}

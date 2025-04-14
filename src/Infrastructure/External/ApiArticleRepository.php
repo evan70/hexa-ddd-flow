@@ -161,6 +161,96 @@ class ApiArticleRepository implements ArticleRepositoryInterface
     }
 
     /**
+     * Find articles by category
+     *
+     * @param string $category
+     * @return array List of articles with the specified category
+     */
+    public function findByCategory(string $category): array
+    {
+        $response = $this->makeApiRequest('GET', '/articles', [
+            'category' => $category
+        ]);
+
+        if (isset($response['error']) || empty($response)) {
+            return [];
+        }
+
+        return $response;
+    }
+
+    /**
+     * Find articles by tag
+     *
+     * @param string $tag
+     * @return array List of articles with the specified tag
+     */
+    public function findByTag(string $tag): array
+    {
+        $response = $this->makeApiRequest('GET', '/articles', [
+            'tag' => $tag
+        ]);
+
+        if (isset($response['error']) || empty($response)) {
+            return [];
+        }
+
+        return $response;
+    }
+
+    /**
+     * Get all unique categories from articles
+     *
+     * @return array List of all categories
+     */
+    public function getAllCategories(): array
+    {
+        $response = $this->makeApiRequest('GET', '/categories');
+
+        if (isset($response['error']) || empty($response)) {
+            return [];
+        }
+
+        return $response;
+    }
+
+    /**
+     * Get all unique tags from articles
+     *
+     * @return array List of all tags
+     */
+    public function getAllTags(): array
+    {
+        $response = $this->makeApiRequest('GET', '/tags');
+
+        if (isset($response['error']) || empty($response)) {
+            return [];
+        }
+
+        return $response;
+    }
+
+    /**
+     * Find an article by slug
+     *
+     * @param string $slug
+     * @return array|null Article data or null if not found
+     */
+    public function findBySlug(string $slug): ?array
+    {
+        $response = $this->makeApiRequest('GET', '/articles', [
+            'slug' => $slug
+        ]);
+
+        if (isset($response['error']) || empty($response)) {
+            return null;
+        }
+
+        // API vráti zoznam článkov, ale my potrebujeme len jeden
+        return $response[0] ?? null;
+    }
+
+    /**
      * Make an API request
      *
      * @param string $method HTTP method

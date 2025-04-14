@@ -118,6 +118,30 @@
                             <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">ID článku</h3>
                             <p class="mt-1 text-sm break-all">{{ article.id }}</p>
                         </div>
+
+                        {% if article.categories is defined and article.categories|length > 0 %}
+                        <div>
+                            <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Kategórie</h3>
+                            <div class="mt-1 flex flex-wrap gap-1">
+                                {% for category in article.categories %}
+                                    <a href="/web/view/category/{{ category }}" class="px-2 py-1 text-xs font-semibold rounded-full bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200 hover:bg-indigo-200 dark:hover:bg-indigo-800 transition-theme">
+                                        {{ category }}
+                                    </a>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        {% if article.tag is defined and article.tag is not empty %}
+                        <div>
+                            <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Tag</h3>
+                            <div class="mt-1">
+                                <a href="/web/view/tag/{{ article.tag }}" class="px-2 py-1 text-xs font-semibold rounded-full bg-pink-100 text-pink-800 dark:bg-pink-900 dark:text-pink-200 hover:bg-pink-200 dark:hover:bg-pink-800 transition-theme">
+                                    {{ article.tag }}
+                                </a>
+                            </div>
+                        </div>
+                        {% endif %}
                     </div>
                 </div>
             </div>

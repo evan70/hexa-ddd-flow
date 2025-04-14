@@ -6,7 +6,10 @@ use Slim\App;
 use Slim\Routing\RouteCollectorProxy;
 use App\Infrastructure\Controller\UserController;
 use App\Infrastructure\Controller\ArticleController;
+use App\Infrastructure\Controller\AuthController;
+use App\Infrastructure\Controller\MarkController;
 use App\Infrastructure\Middleware\UuidValidatorMiddleware;
+use App\Infrastructure\Middleware\AuthMiddleware;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\Views\Twig;
@@ -18,19 +21,24 @@ return function (App $app) {
         $view = $this->get(Twig::class);
         return $view->render($response, 'home.twig');
     });
-    
+
+    // Autentifikácia
+    $app->get('/login', [AuthController::class, 'loginPage']);
+    $app->post('/login', [AuthController::class, 'login']);
+    $app->get('/logout', [AuthController::class, 'logout']);
+
     // Test 404 stránky
     $app->get('/test-404', function (Request $request, Response $response) {
         throw new HttpNotFoundException($request, "Testovacia 404 chyba");
     });
-    
+
     // API routy
     $app->group('/api', function (RouteCollectorProxy $group) {
         // Users API
         $group->get('/users', [UserController::class, 'index']);
         $group->get('/users/{id}', [UserController::class, 'show'])
             ->add(UuidValidatorMiddleware::class);
-        
+
         // Articles API
         $group->get('/articles', [ArticleController::class, 'index']);
         $group->get('/articles/{id}', [ArticleController::class, 'show'])
@@ -43,49 +51,76 @@ return function (App $app) {
         $group->delete('/articles/{id}', [ArticleController::class, 'delete'])
             ->add(UuidValidatorMiddleware::class);
     });
-    
+
     // Web routy
     $app->group('/web', function (RouteCollectorProxy $group) {
         // Získanie všetkých článkov (JSON)
         $group->get('/articles', [ArticleController::class, 'index']);
-        
+
         // Získanie článku podľa ID (JSON)
         $group->get('/articles/{id}', [ArticleController::class, 'show'])
             ->add(UuidValidatorMiddleware::class);
-        
+
         // Získanie článkov podľa typu (JSON)
         $group->get('/articles/type/{type}', [ArticleController::class, 'showByType']);
-        
+
         // HTML zobrazenie článkov
         $group->get('/view/articles', [ArticleController::class, 'viewList']);
-        
-        // HTML zobrazenie článku
+
+        // HTML zobrazenie článku podľa ID
         $group->get('/view/articles/{id}', [ArticleController::class, 'viewDetail'])
             ->add(UuidValidatorMiddleware::class);
+
+        // HTML zobrazenie článku podľa slugu
+        $group->get('/view/{type}/{slug}', [ArticleController::class, 'viewBySlug']);
+
+        // HTML zobrazenie článkov podľa typu
+        $group->get('/view/{type}', [ArticleController::class, 'viewByType']);
+
+        // HTML zobrazenie článkov podľa kategórie
+        $group->get('/view/category/{category}', [ArticleController::class, 'viewByCategory']);
+
+        // HTML zobrazenie článkov podľa tagu
+        $group->get('/view/tag/{tag}', [ArticleController::class, 'viewByTag']);
     });
-    
-    // Mark routy
+
+    // Mark CMS routy (chránené autentifikáciou)
     $app->group('/mark', function (RouteCollectorProxy $group) {
-        // Získanie všetkých používateľov (JSON)
-        $group->get('/users', [UserController::class, 'index']);
-        
-        // Získanie používateľa podľa ID (JSON)
-        $group->get('/users/{id}', [UserController::class, 'show'])
+        // Dashboard
+        $group->get('', [MarkController::class, 'dashboard']);
+
+        // Používatelia
+        $group->get('/users', [MarkController::class, 'users']);
+        $group->get('/users/create', [MarkController::class, 'createUserForm']);
+        $group->get('/users/{id}/edit', [MarkController::class, 'editUserForm'])
             ->add(UuidValidatorMiddleware::class);
-        
-        // Vytvorenie nového článku
-        $group->post('/articles', [ArticleController::class, 'create'])
+        $group->get('/users/{id}', [MarkController::class, 'userDetail'])
             ->add(UuidValidatorMiddleware::class);
-        
-        // Aktualizácia článku
-        $group->put('/articles/{id}', [ArticleController::class, 'update'])
+
+        // Články
+        $group->get('/articles', [MarkController::class, 'articles']);
+        $group->get('/articles/create', [MarkController::class, 'createArticleForm']);
+        $group->get('/articles/{id}/edit', [MarkController::class, 'editArticleForm'])
             ->add(UuidValidatorMiddleware::class);
-        
-        // Vymazanie článku
-        $group->delete('/articles/{id}', [ArticleController::class, 'delete'])
+        $group->get('/articles/{id}', [MarkController::class, 'articleDetail'])
             ->add(UuidValidatorMiddleware::class);
-        
-        // HTML zobrazenie používateľov
-        $group->get('/view/users', [UserController::class, 'viewList']);
-    });
+
+        // Nastavenia
+        $group->get('/settings', [MarkController::class, 'settings']);
+        $group->post('/settings', [MarkController::class, 'settings']);
+
+        // API pre používateľov
+        $group->post('/api/users', [UserController::class, 'create']);
+        $group->put('/api/users/{id}', [UserController::class, 'update'])
+            ->add(UuidValidatorMiddleware::class);
+        $group->delete('/api/users/{id}', [UserController::class, 'delete'])
+            ->add(UuidValidatorMiddleware::class);
+
+        // API pre články
+        $group->post('/api/articles', [ArticleController::class, 'create']);
+        $group->put('/api/articles/{id}', [ArticleController::class, 'update'])
+            ->add(UuidValidatorMiddleware::class);
+        $group->delete('/api/articles/{id}', [ArticleController::class, 'delete'])
+            ->add(UuidValidatorMiddleware::class);
+    })->add(AuthMiddleware::class);
 };

@@ -16,7 +16,7 @@ class ViteAssetHelper
     private array $imageMap = [];
     private array $jsMap = [];
     private array $cssMap = [];
-    
+
     /**
      * Konštruktor
      *
@@ -34,7 +34,7 @@ class ViteAssetHelper
         $this->devServerUrl = $devServerUrl;
         $this->loadAssetMaps();
     }
-    
+
     /**
      * Vráti CSS tag pre asset
      *
@@ -47,33 +47,33 @@ class ViteAssetHelper
         if ($this->isDev) {
             return '<link rel="stylesheet" href="' . $this->devServerUrl . '/' . $path . '" />';
         }
-        
+
         // Hľadanie CSS súboru v mape
         $key = $this->normalizePath($path);
         if (isset($this->cssMap[$key])) {
             return '<link rel="stylesheet" href="/build/assets/' . $this->cssMap[$key] . '" />';
         }
-        
+
         // V produkčnom móde používame manifest
         $manifest = $this->loadManifest();
-        
+
         if ($manifest === null || !isset($manifest[$path])) {
             // Fallback, ak manifest neexistuje alebo asset nie je v manifeste
             return '';
         }
-        
+
         if (!isset($manifest[$path]['css']) || !is_array($manifest[$path]['css'])) {
             return '';
         }
-        
+
         $tags = '';
         foreach ($manifest[$path]['css'] as $cssPath) {
             $tags .= '<link rel="stylesheet" href="/build/' . $cssPath . '" />';
         }
-        
+
         return $tags;
     }
-    
+
     /**
      * Vráti JS tag pre asset
      *
@@ -89,21 +89,21 @@ class ViteAssetHelper
                 <script type="module" src="' . $this->devServerUrl . '/' . $path . '"></script>
             ';
         }
-        
+
         // Hľadanie JS súboru v mape
         $key = $this->normalizePath($path);
         if (isset($this->jsMap[$key])) {
             return '<script type="module" src="/build/assets/' . $this->jsMap[$key] . '"></script>';
         }
-        
+
         // V produkčnom móde používame manifest
         $manifest = $this->loadManifest();
-        
+
         if ($manifest === null || !isset($manifest[$path])) {
             // Fallback, ak manifest neexistuje alebo asset nie je v manifeste
             return '<script type="module" src="/build/' . $path . '"></script>';
         }
-        
+
         // Pridanie importovaných súborov
         $tags = '';
         if (isset($manifest[$path]['imports']) && is_array($manifest[$path]['imports'])) {
@@ -114,13 +114,13 @@ class ViteAssetHelper
                 }
             }
         }
-        
+
         // Pridanie hlavného súboru
         $tags .= '<script type="module" src="/build/' . $manifest[$path]['file'] . '"></script>';
-        
+
         return $tags;
     }
-    
+
     /**
      * Vráti URL pre asset
      *
@@ -133,12 +133,12 @@ class ViteAssetHelper
         if ($this->isDev) {
             return $this->devServerUrl . '/' . $path;
         }
-        
+
         // Pre statické súbory (obrázky)
         if (preg_match('/\\.(jpg|jpeg|png|gif|svg|webp)$/i', $path)) {
             return $this->image(basename($path));
         }
-        
+
         // Pre JavaScript súbory
         if (preg_match('/\\.js$/i', $path)) {
             $key = $this->normalizePath($path);
@@ -146,7 +146,7 @@ class ViteAssetHelper
                 return '/build/assets/' . $this->jsMap[$key];
             }
         }
-        
+
         // Pre CSS súbory
         if (preg_match('/\\.css$/i', $path)) {
             $key = $this->normalizePath($path);
@@ -154,18 +154,18 @@ class ViteAssetHelper
                 return '/build/assets/' . $this->cssMap[$key];
             }
         }
-        
+
         // V produkčnom móde používame manifest
         $manifest = $this->loadManifest();
-        
+
         if ($manifest === null || !isset($manifest[$path])) {
             // Fallback, ak manifest neexistuje alebo asset nie je v manifeste
             return '/build/' . $path;
         }
-        
+
         return '/build/' . $manifest[$path]['file'];
     }
-    
+
     /**
      * Vráti URL pre obrázok
      *
@@ -178,17 +178,17 @@ class ViteAssetHelper
         if ($this->isDev) {
             return $this->devServerUrl . '/' . $path;
         }
-        
+
         // Hľadanie obrázka v mape
         $filename = basename($path);
         if (isset($this->imageMap[$filename])) {
             return '/build/assets/' . $this->imageMap[$filename];
         }
-        
+
         // Fallback, ak obrázok nie je v mape
         return '/build/' . $path;
     }
-    
+
     /**
      * Načíta manifest.json
      *
@@ -199,16 +199,16 @@ class ViteAssetHelper
         if ($this->manifest !== null) {
             return $this->manifest;
         }
-        
+
         if (!file_exists($this->manifestPath)) {
             return null;
         }
-        
+
         $this->manifest = json_decode(file_get_contents($this->manifestPath), true);
-        
+
         return $this->manifest;
     }
-    
+
     /**
      * Načíta mapy assetov z manifest.json
      */
@@ -218,34 +218,34 @@ class ViteAssetHelper
         if ($manifest === null) {
             return;
         }
-        
+
         // Prehľadávanie manifestu pre assety
         foreach ($manifest as $key => $value) {
             if (!isset($value['file'])) {
                 continue;
             }
-            
+
             $file = $value['file'];
             $normalizedKey = $this->normalizePath($key);
-            
+
             // Obrázky
             if (preg_match('/assets\/(.*?)\.(jpg|jpeg|png|gif|svg|webp)/i', $file, $matches)) {
                 $originalName = basename($key);
                 $hashedName = basename($file);
                 $this->imageMap[$originalName] = $hashedName;
             }
-            
+
             // JavaScript
             if (preg_match('/assets\/(.*?)\.js$/i', $file)) {
                 $this->jsMap[$normalizedKey] = basename($file);
             }
-            
+
             // CSS
             if (preg_match('/assets\/(.*?)\.css$/i', $file)) {
                 $this->cssMap[$normalizedKey] = basename($file);
             }
         }
-        
+
         // Prehľadávanie adresára assets pre obrázky
         $assetsDir = dirname($this->manifestPath) . '/assets';
         if (is_dir($assetsDir)) {
@@ -256,7 +256,7 @@ class ViteAssetHelper
                     $originalName = $matches[1] . '.' . $matches[3];
                     $this->imageMap[$originalName] = $file;
                 }
-                
+
                 // JavaScript
                 if (preg_match('/(.*?)-(.*?)\.js$/i', $file, $matches)) {
                     $originalName = $matches[1] . '.js';
@@ -264,7 +264,7 @@ class ViteAssetHelper
                     $this->jsMap['js/' . $originalName] = $file;
                     $this->jsMap['resources/js/' . $originalName] = $file;
                 }
-                
+
                 // CSS
                 if (preg_match('/(.*?)-(.*?)\.css$/i', $file, $matches)) {
                     $originalName = $matches[1] . '.css';
@@ -275,7 +275,7 @@ class ViteAssetHelper
             }
         }
     }
-    
+
     /**
      * Normalizuje cestu k assetu
      *
@@ -286,10 +286,10 @@ class ViteAssetHelper
     {
         // Odstránenie resources/ z cesty
         $path = preg_replace('/^resources\//', '', $path);
-        
+
         // Odstránenie ./ z cesty
         $path = preg_replace('/^\.\//', '', $path);
-        
+
         return $path;
     }
 }

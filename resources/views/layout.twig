@@ -27,13 +27,26 @@
     <header class="bg-surface shadow-sm transition-theme">
         <div class="container mx-auto px-4 py-4">
             <nav class="flex items-center justify-between">
-                <a href="/" class="text-xl font-bold text-primary">Slim 4 App</a>
+                <a href="/" class="text-xl font-bold text-primary">MarkCMS</a>
 
                 <div class="flex items-center space-x-6">
                     <div class="flex space-x-4">
                         <a href="/" class="text-text-light hover:text-primary transition-theme">Domov</a>
-                        <a href="/web/view/articles" class="text-text-light hover:text-primary transition-theme">Články</a>
-                        <a href="/mark/view/users" class="text-text-light hover:text-primary transition-theme">Používatelia</a>
+                        {% if auth.check() and auth.hasRoleCheck('admin') %}
+                            <a href="/mark" class="text-text-light hover:text-primary transition-theme">Dashboard</a>
+                            <a href="/mark/articles" class="text-text-light hover:text-primary transition-theme">Články</a>
+                            <a href="/mark/users" class="text-text-light hover:text-primary transition-theme">Používatelia</a>
+                            <a href="/mark/settings" class="text-text-light hover:text-primary transition-theme">Nastavenia</a>
+                        {% endif %}
+                    </div>
+
+                    <div class="flex space-x-4">
+                        {% if auth.check() %}
+                            <span class="text-text-light">{{ auth.getUser().username }}</span>
+                            <a href="/logout" class="text-text-light hover:text-primary transition-theme">Odhlásiť sa</a>
+                        {% else %}
+                            <a href="/login" class="text-text-light hover:text-primary transition-theme">Prihlásiť sa</a>
+                        {% endif %}
                     </div>
 
                     {# Dark Mode Toggle #}
@@ -47,10 +60,10 @@
                     >
                         <span class="dark-mode-toggle-dot">
                             <span class="sr-only">Prepnúť tmavý režim</span>
-                            <svg id="darkIcon" class="h-3 w-3 text-amber-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                            <svg id="darkIcon" class="h-5 w-5 text-yellow-500 dark:text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                                 <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
                             </svg>
-                            <svg id="lightIcon" class="h-3 w-3 text-amber-500 hidden" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                            <svg id="lightIcon" class="h-5 w-5 text-gray-600 dark:text-yellow-400 hidden" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                                 <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd" />
                             </svg>
                         </span>
@@ -77,6 +90,8 @@
                     <ul class="space-y-1">
                         <li><a href="/" class="text-gray-400 hover:text-white transition-theme">Domov</a></li>
                         <li><a href="/web/view/articles" class="text-gray-400 hover:text-white transition-theme">Články</a></li>
+                        <li><a href="/web/view/product" class="text-gray-400 hover:text-white transition-theme">Produkty</a></li>
+                        <li><a href="/web/view/page" class="text-gray-400 hover:text-white transition-theme">Stránky</a></li>
                         <li><a href="/mark/view/users" class="text-gray-400 hover:text-white transition-theme">Používatelia</a></li>
                     </ul>
                 </div>

@@ -1,0 +1,71 @@
+{% extends "layout.twig" %}
+
+{% block title %}MarkCMS Dashboard{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold mb-6 text-gray-800 dark:text-gray-200">MarkCMS Dashboard</h1>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <!-- Štatistika článkov -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 transition-theme">
+            <h2 class="text-xl font-semibold mb-2 text-gray-800 dark:text-gray-200">Články</h2>
+            <p class="text-3xl font-bold text-primary">{{ articlesCount }}</p>
+            <a href="/mark/articles" class="text-primary hover:text-primary-dark mt-2 inline-block">Zobraziť všetky</a>
+        </div>
+        
+        <!-- Štatistika používateľov -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 transition-theme">
+            <h2 class="text-xl font-semibold mb-2 text-gray-800 dark:text-gray-200">Používatelia</h2>
+            <p class="text-3xl font-bold text-primary">{{ usersCount }}</p>
+            <a href="/mark/users" class="text-primary hover:text-primary-dark mt-2 inline-block">Zobraziť všetkých</a>
+        </div>
+    </div>
+    
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <!-- Posledné články -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 transition-theme">
+            <h2 class="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-200">Posledné články</h2>
+            
+            {% if articles|length > 0 %}
+                <div class="divide-y divide-gray-200 dark:divide-gray-700">
+                    {% for article in articles|slice(0, 5) %}
+                        <div class="py-3">
+                            <a href="/mark/articles/{{ article.id }}" class="text-primary hover:text-primary-dark font-medium">{{ article.title }}</a>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">{{ article.created_at|date("d.m.Y H:i") }}</p>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="text-gray-500 dark:text-gray-400">Žiadne články</p>
+            {% endif %}
+            
+            <div class="mt-4">
+                <a href="/mark/articles/create" class="btn btn-primary">Pridať článok</a>
+            </div>
+        </div>
+        
+        <!-- Poslední používatelia -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 transition-theme">
+            <h2 class="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-200">Poslední používatelia</h2>
+            
+            {% if users|length > 0 %}
+                <div class="divide-y divide-gray-200 dark:divide-gray-700">
+                    {% for user in users|slice(0, 5) %}
+                        <div class="py-3">
+                            <a href="/mark/users/{{ user.id }}" class="text-primary hover:text-primary-dark font-medium">{{ user.username }}</a>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">{{ user.email }} ({{ user.role }})</p>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="text-gray-500 dark:text-gray-400">Žiadni používatelia</p>
+            {% endif %}
+            
+            <div class="mt-4">
+                <a href="/mark/users/create" class="btn btn-primary">Pridať používateľa</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

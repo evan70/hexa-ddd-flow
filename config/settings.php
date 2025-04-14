@@ -12,6 +12,9 @@ return [
         ],
         'articles' => [
             'path' => __DIR__ . '/../data/articles.sqlite'
+        ],
+        'app' => [
+            'path' => __DIR__ . '/../data/app.sqlite'
         ]
     ]
 ];

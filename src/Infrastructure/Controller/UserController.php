@@ -6,30 +6,29 @@ namespace App\Infrastructure\Controller;
 
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
-use App\Ports\UserRepositoryInterface;
+use App\Application\Service\UserService;
 use Slim\Exception\HttpNotFoundException;
 use Slim\Views\Twig;
 
 /**
  * Controller pre používateľov
  */
-class UserController
+class UserController extends AbstractController
 {
-    private UserRepositoryInterface $userRepository;
-    private Twig $twig;
+    private UserService $userService;
 
     /**
      * Konštruktor
      *
-     * @param UserRepositoryInterface $userRepository
+     * @param UserService $userService
      * @param Twig $twig
      */
     public function __construct(
-        UserRepositoryInterface $userRepository,
+        UserService $userService,
         Twig $twig
     ) {
-        $this->userRepository = $userRepository;
-        $this->twig = $twig;
+        parent::__construct($twig);
+        $this->userService = $userService;
     }
 
     /**
@@ -41,7 +40,7 @@ class UserController
      */
     public function index(Request $request, Response $response): Response
     {
-        $users = $this->userRepository->findAll();
+        $users = $this->userService->getAllUsers();
 
         $response->getBody()->write(json_encode($users));
         return $response->withHeader('Content-Type', 'application/json');
@@ -60,11 +59,7 @@ class UserController
         $id = $args['id'];
 
         // UUID validácia je vykonávaná v middleware
-        $user = $this->userRepository->findById($id);
-
-        if (!$user) {
-            throw new HttpNotFoundException($request, "User not found");
-        }
+        $user = $this->userService->getUserById($id, $request);
 
         $response->getBody()->write(json_encode($user));
         return $response->withHeader('Content-Type', 'application/json');
@@ -79,9 +74,9 @@ class UserController
      */
     public function viewList(Request $request, Response $response): Response
     {
-        $users = $this->userRepository->findAll();
+        $users = $this->userService->getAllUsers();
 
-        return $this->twig->render($response, 'users/list.twig', [
+        return $this->render($response, 'users/list.twig', [
             'users' => $users
         ]);
     }

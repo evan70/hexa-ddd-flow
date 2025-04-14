@@ -1,0 +1,135 @@
+{% extends "layout.twig" %}
+
+{% block title %}{{ article is defined ? 'Upraviť článok' : 'Nový článok' }} - MarkCMS{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold mb-6 text-gray-800 dark:text-gray-200">
+        {{ article is defined ? 'Upraviť článok' : 'Nový článok' }}
+    </h1>
+
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden transition-theme">
+        <form id="articleForm" class="p-6">
+            <input type="hidden" name="{{ csrf.keys.name }}" value="{{ csrf.name }}">
+            <input type="hidden" name="{{ csrf.keys.value }}" value="{{ csrf.value }}">
+            {% if article is defined %}
+                <input type="hidden" name="id" value="{{ article.id }}">
+            {% endif %}
+            <!-- Pridanie skrytého poľa author_id s ID aktuálne prihláseného používateľa -->
+            <input type="hidden" name="author_id" value="{{ auth.getUser().id }}">
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="md:col-span-2">
+                    <div class="mb-6">
+                        <label for="title" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Názov</label>
+                        <input type="text" id="title" name="title" value="{{ article.title|default('') }}" required
+                               class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:bg-gray-700 dark:text-white transition-theme">
+                    </div>
+
+                    <div>
+                        <label for="content" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Obsah</label>
+                        <textarea id="content" name="content" rows="15" required
+                                  class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:bg-gray-700 dark:text-white transition-theme">{{ article.content|default('') }}</textarea>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="mb-6">
+                        <label for="type" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Typ</label>
+                        <select id="type" name="type" required
+                                class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:bg-gray-700 dark:text-white transition-theme">
+                            <option value="article" {{ article.type|default('') == 'article' ? 'selected' : '' }}>Článok</option>
+                            <option value="product" {{ article.type|default('') == 'product' ? 'selected' : '' }}>Produkt</option>
+                            <option value="page" {{ article.type|default('') == 'page' ? 'selected' : '' }}>Stránka</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-6">
+                        <label for="categories" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Kategórie (oddelené čiarkou)</label>
+                        <input type="text" id="categories" name="categories"
+                               value="{{ article.categories is defined ? article.categories|join(', ') : '' }}"
+                               class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:bg-gray-700 dark:text-white transition-theme">
+                    </div>
+
+                    <div class="mb-6">
+                        <label for="tags" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Tagy (oddelené čiarkou)</label>
+                        <input type="text" id="tags" name="tags"
+                               value="{{ article.tags is defined ? article.tags|join(', ') : '' }}"
+                               class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:bg-gray-700 dark:text-white transition-theme">
+                    </div>
+
+                    <div class="mb-6">
+                        <label for="status" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Stav</label>
+                        <select id="status" name="status" required
+                                class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 dark:bg-gray-700 dark:text-white transition-theme">
+                            <option value="published" {{ article.status|default('') == 'published' ? 'selected' : '' }}>Publikovaný</option>
+                            <option value="draft" {{ article.status|default('') == 'draft' ? 'selected' : '' }}>Koncept</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-6">
+                <button type="submit" class="btn btn-primary">Uložiť</button>
+                <a href="{{ article is defined ? '/mark/articles/' ~ article.id : '/mark/articles' }}" class="btn btn-secondary ml-2">Zrušiť</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+document.getElementById('articleForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const formData = new FormData(this);
+    const data = Object.fromEntries(formData.entries());
+
+    // Pridanie CSRF tokenov do headers
+    const headers = {
+        'Content-Type': 'application/json',
+        'X-CSRF-TOKEN': data['{{ csrf.keys.value }}'] // Pridanie CSRF tokenu do hlavičky
+    };
+
+    // Spracovanie kategórií a tagov
+    if (data.categories) {
+        data.categories = data.categories.split(',').map(item => item.trim()).filter(item => item);
+    } else {
+        data.categories = [];
+    }
+
+    if (data.tags) {
+        data.tags = data.tags.split(',').map(item => item.trim()).filter(item => item);
+    } else {
+        data.tags = [];
+    }
+
+    const method = data.id ? 'PUT' : 'POST';
+    const url = data.id ? `/mark/api/articles/${data.id}` : '/mark/api/articles';
+
+    fetch(url, {
+        method: method,
+        headers: headers,
+        body: JSON.stringify(data)
+    })
+    .then(response => {
+        if (!response.ok) {
+            // Pokus o získanie detailov chyby z odpovede
+            return response.json().then(errorData => {
+                throw new Error(errorData.error || 'Chyba pri ukladaní článku');
+            }).catch(() => {
+                // Ak sa nepodarilo získať JSON, použijeme všeobecnú chybu
+                throw new Error(`Chyba pri ukladaní článku (${response.status}: ${response.statusText})`);
+            });
+        }
+        return response.json();
+    })
+    .then(data => {
+        window.location.href = '/mark/articles';
+    })
+    .catch(error => {
+        console.error('Chyba:', error);
+        alert(error.message);
+    });
+});
+</script>
+{% endblock %}

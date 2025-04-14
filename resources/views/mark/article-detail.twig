@@ -1,0 +1,94 @@
+{% extends "layout.twig" %}
+
+{% block title %}{{ article.title }} - MarkCMS{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-3xl font-bold text-gray-800 dark:text-gray-200">Detail článku</h1>
+        <div>
+            <a href="/mark/articles/{{ article.id }}/edit" class="btn btn-primary mr-2">Upraviť</a>
+            <button onclick="if(confirm('Naozaj chcete vymazať tento článok?')) { fetch('/api/articles/{{ article.id }}', {method: 'DELETE'}).then(() => window.location.href = '/mark/articles'); }" 
+                    class="btn btn-danger">
+                Vymazať
+            </button>
+        </div>
+    </div>
+    
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden transition-theme">
+        <div class="p-6">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="md:col-span-2">
+                    <h2 class="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-200">{{ article.title }}</h2>
+                    
+                    <div class="prose dark:prose-invert max-w-none">
+                        {{ article.content|raw }}
+                    </div>
+                </div>
+                
+                <div>
+                    <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 transition-theme">
+                        <h3 class="text-lg font-semibold mb-3 text-gray-800 dark:text-gray-200">Informácie</h3>
+                        
+                        <div class="space-y-3">
+                            <div>
+                                <h4 class="text-sm font-medium text-gray-500 dark:text-gray-400">Typ</h4>
+                                <p class="mt-1">
+                                    <span class="px-2 py-1 text-sm font-semibold rounded-full bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-blue-100">
+                                        {{ article.type }}
+                                    </span>
+                                </p>
+                            </div>
+                            
+                            <div>
+                                <h4 class="text-sm font-medium text-gray-500 dark:text-gray-400">Autor</h4>
+                                <p class="mt-1 text-gray-900 dark:text-gray-100">{{ article.author_id }}</p>
+                            </div>
+                            
+                            <div>
+                                <h4 class="text-sm font-medium text-gray-500 dark:text-gray-400">Vytvorené</h4>
+                                <p class="mt-1 text-gray-900 dark:text-gray-100">{{ article.created_at|date("d.m.Y H:i") }}</p>
+                            </div>
+                            
+                            <div>
+                                <h4 class="text-sm font-medium text-gray-500 dark:text-gray-400">Aktualizované</h4>
+                                <p class="mt-1 text-gray-900 dark:text-gray-100">{{ article.updated_at|date("d.m.Y H:i") }}</p>
+                            </div>
+                            
+                            {% if article.categories is defined and article.categories|length > 0 %}
+                            <div>
+                                <h4 class="text-sm font-medium text-gray-500 dark:text-gray-400">Kategórie</h4>
+                                <div class="mt-1 flex flex-wrap gap-2">
+                                    {% for category in article.categories %}
+                                    <span class="px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 dark:bg-gray-600 text-gray-800 dark:text-gray-200">
+                                        {{ category }}
+                                    </span>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% endif %}
+                            
+                            {% if article.tags is defined and article.tags|length > 0 %}
+                            <div>
+                                <h4 class="text-sm font-medium text-gray-500 dark:text-gray-400">Tagy</h4>
+                                <div class="mt-1 flex flex-wrap gap-2">
+                                    {% for tag in article.tags %}
+                                    <span class="px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 dark:bg-gray-600 text-gray-800 dark:text-gray-200">
+                                        {{ tag }}
+                                    </span>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="mt-6">
+        <a href="/mark/articles" class="text-primary hover:text-primary-dark">&larr; Späť na zoznam článkov</a>
+    </div>
+</div>
+{% endblock %}
