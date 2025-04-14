@@ -14,6 +14,7 @@ use App\Infrastructure\Controller\AbstractController;
 use App\Infrastructure\Twig\UuidExtension;
 use App\Infrastructure\Middleware\AuthMiddleware;
 use App\Infrastructure\Middleware\CsrfMiddleware;
+use App\Infrastructure\Middleware\SlimCsrfMiddleware;
 use App\Infrastructure\Persistence\DatabaseSessionRepository;
 use App\Ports\UserRepositoryInterface;
 use App\Ports\ArticleRepositoryInterface;
@@ -22,6 +23,7 @@ use App\Application\Service\ArticleService;
 use App\Application\Service\UserService;
 use App\Application\Service\AuthService;
 use App\Application\Service\CsrfService;
+use Slim\Csrf\Guard;
 use DI\ContainerBuilder;
 use Psr\Container\ContainerInterface;
 use Slim\Views\Twig;
@@ -226,7 +228,6 @@ return function (ContainerBuilder $containerBuilder) {
         AuthController::class => function (ContainerInterface $c) {
             return new AuthController(
                 $c->get(AuthService::class),
-                $c->get(CsrfService::class),
                 $c->get(Twig::class)
             );
         },
@@ -251,7 +252,37 @@ return function (ContainerBuilder $containerBuilder) {
         CsrfMiddleware::class => function (ContainerInterface $c) {
             return new CsrfMiddleware(
                 $c->get(CsrfService::class),
-                ['/api'] // Cesty vylúčené z CSRF ochrany
+                ['/api', '/login'] // Cesty vylúčené z CSRF ochrany
+            );
+        },
+
+        Guard::class => function (ContainerInterface $c) {
+            $responseFactory = new \Slim\Psr7\Factory\ResponseFactory();
+            $guard = new Guard($responseFactory);
+
+            // Nastavenie storage handler pre persistenciu tokenov
+            $guard->setPersistentTokenMode(true);
+
+            // Nastavenie error handlera
+            $guard->setFailureHandler(function (\Psr\Http\Message\ServerRequestInterface $request, \Psr\Http\Message\ResponseInterface $response, $next) {
+                $response = new \Slim\Psr7\Response();
+                $response->getBody()->write(json_encode([
+                    'error' => 'Neplatný CSRF token.'
+                ]));
+
+                return $response
+                    ->withHeader('Content-Type', 'application/json')
+                    ->withStatus(403);
+            });
+
+            return $guard;
+        },
+
+        SlimCsrfMiddleware::class => function (ContainerInterface $c) {
+            return new SlimCsrfMiddleware(
+                $c->get(Guard::class),
+                $c->get(Twig::class),
+                ['/api', '/login'] // Cesty vylúčené z CSRF ochrany
             );
         }
     ]);

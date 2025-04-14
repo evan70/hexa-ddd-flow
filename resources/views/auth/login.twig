@@ -14,12 +14,8 @@
         {% endif %}
 
         <form method="POST" action="/login" class="bg-white dark:bg-gray-800 shadow-md rounded px-8 pt-6 pb-8 mb-4 transition-theme">
-            {% set csrf_token = csrf.generate() %}
-            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-            <!-- Debug info -->
-            <div class="mb-4 p-2 bg-gray-100 dark:bg-gray-700 rounded text-xs">
-                <p>CSRF Token: {{ csrf_token }}</p>
-            </div>
+            <input type="hidden" name="{{ csrf.keys.name }}" value="{{ csrf.name }}">
+            <input type="hidden" name="{{ csrf.keys.value }}" value="{{ csrf.value }}">
             <div class="mb-4">
                 <label class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2" for="email">
                     Email

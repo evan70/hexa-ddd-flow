@@ -30,6 +30,7 @@ if (preg_match('/\.(js|css|jpg|jpeg|png|gif|svg|webp)$/i', $path, $matches)) {
 use App\Infrastructure\Middleware\ErrorHandlerMiddleware;
 use App\Infrastructure\Middleware\UuidValidatorMiddleware;
 use App\Infrastructure\Middleware\CsrfMiddleware;
+use App\Infrastructure\Middleware\SlimCsrfMiddleware;
 use DI\ContainerBuilder;
 use Slim\Factory\AppFactory;
 use Slim\Views\Twig;
@@ -66,7 +67,7 @@ $app->add(TwigMiddleware::createFromContainer($app, Twig::class));
 $app->add($container->get(UuidValidatorMiddleware::class));
 
 // Pridanie CSRF middleware
-$app->add($container->get(CsrfMiddleware::class));
+$app->add($container->get(SlimCsrfMiddleware::class));
 
 // Pridanie vlastného error handler middleware
 $app->add(new ErrorHandlerMiddleware($twig));

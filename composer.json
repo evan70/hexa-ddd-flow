@@ -15,11 +15,12 @@
     },
     "require": {
         "php": "^8.3",
-        "slim/slim": "^4.11",
-        "slim/psr7": "^1.6",
-        "slim/twig-view": "^3.3",
         "php-di/php-di": "^7.0",
-        "ramsey/uuid": "^4.7"
+        "ramsey/uuid": "^4.7",
+        "slim/csrf": "^1.5",
+        "slim/psr7": "^1.6",
+        "slim/slim": "^4.11",
+        "slim/twig-view": "^3.3"
     },
     "require-dev": {
         "phpstan/phpstan": "^2.1",
