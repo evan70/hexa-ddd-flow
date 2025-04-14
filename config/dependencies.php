@@ -14,6 +14,7 @@ use App\Infrastructure\Controller\AbstractController;
 use App\Infrastructure\Twig\UuidExtension;
 use App\Infrastructure\Middleware\AuthMiddleware;
 use App\Infrastructure\Middleware\CsrfMiddleware;
+use App\Infrastructure\Middleware\SessionMiddleware;
 use App\Infrastructure\Middleware\SlimCsrfMiddleware;
 use App\Infrastructure\Persistence\DatabaseSessionRepository;
 use App\Ports\UserRepositoryInterface;
@@ -257,6 +258,11 @@ return function (ContainerBuilder $containerBuilder) {
         },
 
         Guard::class => function (ContainerInterface $c) {
+            // Spustenie session, ak ešte nie je spustená
+            if (session_status() === PHP_SESSION_NONE) {
+                session_start();
+            }
+
             $responseFactory = new \Slim\Psr7\Factory\ResponseFactory();
             $guard = new Guard($responseFactory);
 
@@ -284,6 +290,10 @@ return function (ContainerBuilder $containerBuilder) {
                 $c->get(Twig::class),
                 ['/api', '/login'] // Cesty vylúčené z CSRF ochrany
             );
+        },
+
+        SessionMiddleware::class => function (ContainerInterface $c) {
+            return new SessionMiddleware();
         }
     ]);
 };
