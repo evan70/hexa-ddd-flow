@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Assets</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        h1 {
+            color: #2c3e50;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .test-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .test-section h2 {
+            margin-top: 0;
+            color: #3498db;
+        }
+        .image-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .image-item {
+            flex: 1;
+            min-width: 300px;
+            max-width: 500px;
+            margin-bottom: 20px;
+        }
+        .image-item img {
+            max-width: 100%;
+            height: auto;
+            border: 1px solid #ddd;
+        }
+        .success {
+            color: green;
+        }
+        .error {
+            color: red;
+        }
+        pre {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Test Assets</h1>
+        
+        <div class="test-section">
+            <h2>Test obrázkov cez proxy</h2>
+            <div class="image-container">
+                <div class="image-item">
+                    <h3>docs-hero.jpg</h3>
+                    <img src="image-proxy.php?path=build/docs-hero.jpg" alt="Docs Hero">
+                </div>
+                <div class="image-item">
+                    <h3>testimonial-1.jpg</h3>
+                    <img src="image-proxy.php?path=build/testimonial-1.jpg" alt="Testimonial 1">
+                </div>
+                <div class="image-item">
+                    <h3>testimonial-2.jpg</h3>
+                    <img src="image-proxy.php?path=build/testimonial-2.jpg" alt="Testimonial 2">
+                </div>
+                <div class="image-item">
+                    <h3>testimonial-3.jpg</h3>
+                    <img src="image-proxy.php?path=build/testimonial-3.jpg" alt="Testimonial 3">
+                </div>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h2>Test JavaScript súborov cez proxy</h2>
+            <div id="js-test-result">Načítavam JavaScript...</div>
+            <script>
+                // Dynamicky načítame JavaScript súbor cez proxy
+                const script = document.createElement('script');
+                script.src = 'js-proxy.php?path=build/assets/app-F1B1iBRr.js';
+                script.type = 'module';
+                script.onload = function() {
+                    document.getElementById('js-test-result').innerHTML = '<span class="success">JavaScript súbor bol úspešne načítaný!</span>';
+                };
+                script.onerror = function() {
+                    document.getElementById('js-test-result').innerHTML = '<span class="error">Chyba pri načítaní JavaScript súboru!</span>';
+                };
+                document.head.appendChild(script);
+            </script>
+        </div>
+        
+        <div class="test-section">
+            <h2>Diagnostika súborov</h2>
+            <p>Pre zobrazenie diagnostických informácií o súboroch navštívte <a href="build-check.php" target="_blank">build-check.php</a>.</p>
+        </div>
+    </div>
+</body>
+</html>
