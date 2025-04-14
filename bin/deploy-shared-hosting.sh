@@ -141,20 +141,29 @@ cat > $BUILD_DIR/README_DEPLOY.txt << 'EOL'
 Ak máte akékoľvek otázky, kontaktujte nás na [email@example.com]
 EOL
 
-# Vytvorenie ZIP archívu
+# Vytvorenie ZIP archívu pre Windows používateľov
 log "Vytváram ZIP archív..."
 zip -r "${BUILD_DIR}.zip" $BUILD_DIR > /dev/null
+
+# Vytvorenie TAR.GZ archívu pre Linux používateľov (zachováva oprávnenia)
+log "Vytváram TAR.GZ archív..."
+tar -czf "${BUILD_DIR}.tar.gz" $BUILD_DIR > /dev/null
 
 # Vyčistenie
 log "Čistím..."
 rm -rf $BUILD_DIR
 
-success "Build pre shared hosting bol úspešne vytvorený: ${BUILD_DIR}.zip"
+success "Build pre shared hosting bol úspešne vytvorený:"
+success "- ZIP: ${BUILD_DIR}.zip (pre Windows)"
+success "- TAR.GZ: ${BUILD_DIR}.tar.gz (pre Linux, zachováva oprávnenia)"
 echo ""
 echo "Inštrukcie pre nasadenie:"
-echo "1. Rozbaľte ZIP archív na vašom počítači"
+echo "1. Rozbaľte archív na vašom počítači (ZIP pre Windows, TAR.GZ pre Linux)"
 echo "2. Nahrajte všetky súbory a adresáre na váš hosting pomocou FTP klienta"
 echo "3. Uistite sa, že adresáre 'var' a 'data' majú práva na zápis"
 echo "4. Navštívte vašu doménu v prehliadači"
 echo ""
-echo "Pre viac informácií si prečítajte README_DEPLOY.txt v ZIP archíve"
+echo "Pre viac informácií si prečítajte README_DEPLOY.txt v archíve"
+echo ""
+echo "Poznámka: TAR.GZ archív zachováva Unix oprávnenia, symlinky a ďalšie metadáta,"
+echo "          ktoré ZIP nemusí správne zachovať. Odporúčame použiť TAR.GZ pre Linux."

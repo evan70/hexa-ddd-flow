@@ -17,11 +17,17 @@ Pre nasadenie aplikácie na shared hosting môžete použiť jeden z dvoch skrip
    php bin/deploy-shared-hosting.php
    ```
 
-Oba skripty vytvoria ZIP archív `build_shared_hosting.zip`, ktorý obsahuje všetky potrebné súbory pre nasadenie na shared hosting.
+Bash skript vytvorí dva archívy:
+- `build_shared_hosting.zip` (pre Windows používateľov)
+- `build_shared_hosting.tar.gz` (pre Linux používateľov, zachováva Unix oprávnenia)
 
-## Obsah ZIP archívu
+PHP skript vytvorí len ZIP archív `build_shared_hosting.zip`.
 
-ZIP archív obsahuje nasledujúce súbory a adresáre:
+Oba archívy obsahujú všetky potrebné súbory pre nasadenie na shared hosting.
+
+## Obsah archívu
+
+Archív (ZIP alebo TAR.GZ) obsahuje nasledujúce súbory a adresáre:
 
 - `public/` - verejne dostupné súbory
 - `src/` - zdrojový kód aplikácie
@@ -38,7 +44,9 @@ ZIP archív obsahuje nasledujúce súbory a adresáre:
 
 ## Kroky nasadenia
 
-1. **Rozbaľte ZIP archív** na vašom počítači
+1. **Rozbaľte archív** na vašom počítači
+   - Pre Windows použite ZIP archív
+   - Pre Linux odporúčame použiť TAR.GZ archív, ktorý zachováva Unix oprávnenia
 2. **Nahrajte všetky súbory a adresáre** na váš hosting pomocou FTP klienta
    - Môžete použiť FileZilla, WinSCP alebo iný FTP klient
    - Nahrajte súbory do koreňového adresára vášho hostingu (napr. `public_html`, `www` alebo `htdocs`)
