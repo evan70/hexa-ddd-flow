@@ -1,6 +1,6 @@
-# Hexagonálna architektúra so Slim 4, SQLite, Twig, Ramsey UUID, TailwindCSS a GSAP
+# MarkCMS - Hexagonálna architektúra so Slim 4, SQLite, Twig, Ramsey UUID, TailwindCSS a GSAP
 
-Tento projekt implementuje hexagonálnu architektúru (ports and adapters) pre jednoduchú aplikáciu s entitami User a Article reprezentovanými ako PHP 8.3+ konštanty.
+MarkCMS je moderný systém na správu obsahu implementovaný pomocou hexagonálnej architektúry (ports and adapters) a Domain-Driven Design princípov. Systém poskytuje správu používateľov a článkov s podporou SEO friendly URL, tmavého režimu a moderného responzívneho dizajnu.
 
 ## Štruktúra projektu
 
@@ -83,12 +83,35 @@ Tento projekt implementuje hexagonálnu architektúru (ports and adapters) pre j
     └── 📂 twig       <- Cache pre Twig šablóny
 
 📂 bin
-├── init-db.php       <- PHP skript pre inicializáciu databázy
-└── init-db.sh        <- Shell skript pre spustenie inicializácie
+├── init-db.php                <- PHP skript pre inicializáciu databázy
+├── init-db.sh                 <- Shell skript pre spustenie inicializácie
+├── list-routes.php            <- Farebný výpis všetkých dostupných rout
+├── list-routes-simple.php      <- Jednoduchý výpis rout pre shared hosting
+├── add-slug-column.php         <- Skript pre pridanie stĺpca slug do tabuľky articles
+├── deploy-shared-hosting.sh    <- Skript pre nasadenie na shared hosting (Linux)
+└── deploy-shared-hosting.php   <- Skript pre nasadenie na shared hosting (Windows)
+
+📂 public
+├── index.php         <- Vstupný bod aplikácie
+├── .htaccess         <- Konfigurácia Apache
+├── 📂 build          <- Skompilované assets (generované Vite.js)
+└── 📂 debug          <- Nástroje pre debugovanie
+    ├── routes.php      <- Webový výpis dostupných rout
+    └── .htaccess       <- Zabezpečenie adresára debug
 
 📂 docs               <- Dokumentácia
-    ├── frontend-optimization.md <- Dokumentácia optimalizácie frontendu
-    └── architecture-refactoring.md <- Dokumentácia refaktoringu architektúry
+├── frontend-optimization.md    <- Dokumentácia optimalizácie frontendu
+├── architecture-refactoring.md  <- Dokumentácia refaktoringu architektúry
+├── recent-improvements.md      <- Zoznam nedávnych vylepšení
+├── optimization-plan.md        <- Plán optimalizácie projektu
+├── shared-hosting-deployment.md <- Návod na nasadenie na shared hosting
+├── release-process.md          <- Proces vytvorenia release
+├── testing.md                  <- Návod na spúšťanie testov
+├── test-results.md             <- Výsledky testov
+├── debugging.md                <- Nástroje pre debugovanie
+├── user-guide.md               <- Používateľská príručka
+├── api-reference.md            <- API referencia
+└── installation-guide.md       <- Inštalačná príručka
 ```
 
 ## Čistenie kódu
@@ -257,6 +280,21 @@ composer dev
 # Spustenie testov
 composer test
 
+# Spustenie testov s podrobným výpisom
+composer test:verbose
+
+# Spustenie unit testov
+composer test:unit
+
+# Spustenie integračných testov
+composer test:integration
+
+# Generovanie coverage reportu
+composer test:coverage
+
+# Spustenie všetkých testov s prehľadným výpisom
+composer test:all
+
 # Analýza kódu pomocou PHPStan
 composer phpstan
 
@@ -293,12 +331,40 @@ composer cs-fix
 
 ## Produkčné nasadenie
 
+### Nasadenie na shared hosting
+
+1. Vytvorte archív pre nasadenie:
+   ```bash
+   # Pre Linux používateľov (zachováva Unix oprávnenia)
+   ./bin/deploy-shared-hosting.sh
+
+   # Pre Windows používateľov
+   php bin/deploy-shared-hosting.php
+   ```
+
+2. Rozbaľte archív (`build_shared_hosting.zip` alebo `build_shared_hosting.tar.gz`)
+
+3. Nahrajte všetky súbory na váš hosting pomocou FTP klienta
+
+4. Nastavte práva na zápis pre adresáre `var` a `data` (chmod 755 alebo 777)
+
+5. Navštívte vašu doménu v prehliadači
+
+Podrobný návod nájdete v [dokumentácii nasadenia na shared hosting](docs/shared-hosting-deployment.md).
+
+### Manuálne nasadenie
+
 1. Skompilujte frontend assets:
    ```
    composer build
    ```
 
-2. Nasaďte aplikáciu na produkčný server
+2. Optimalizujte autoloader:
+   ```
+   composer install --no-dev --optimize-autoloader
+   ```
+
+3. Nasaďte aplikáciu na produkčný server
 
 ## Výhody tejto architektúry
 
@@ -323,3 +389,52 @@ composer cs-fix
    - TailwindCSS pre rýchly a konzistentný dizajn
    - GSAP pre profesionálne animácie
    - Vite.js pre rýchly development a optimalizovaný build
+
+## Dokumentácia
+
+### Pre vývojárov
+
+- [Nedávne vylepšenia](docs/recent-improvements.md) - Zoznam nedávnych vylepšení
+- [Plán optimalizácie](docs/optimization-plan.md) - Plán optimalizácie projektu
+- [Proces vytvorenia release](docs/release-process.md) - Proces mergovania a vytvorenia release
+- [Návod na spúšťanie testov](docs/testing.md) - Návod na spúšťanie testov
+- [Výsledky testov](docs/test-results.md) - Výsledky testov
+- [Nástroje pre debugovanie](docs/debugging.md) - Nástroje pre debugovanie
+
+### Pre používateľov
+
+- [Používateľská príručka](docs/user-guide.md) - Návod pre bežných používateľov
+- [API referencia](docs/api-reference.md) - Dokumentácia verejného API
+- [Inštalačná príručka](docs/installation-guide.md) - Návod na inštaláciu a nasadenie
+- [Nasadenie na shared hosting](docs/shared-hosting-deployment.md) - Návod na nasadenie na shared hosting
+
+## Funkcie
+
+### SEO friendly URL
+
+Aplikácia podporuje SEO friendly URL pomocou slugov:
+
+- Automatické generovanie slugov z názvu článku
+- URL v tvare `/web/view/{type}/{slug}` namiesto `/web/view/articles/{id}`
+- Podpora diakritiky a špeciálnych znakov
+
+### Debugovacie nástroje
+
+Aplikácia poskytuje nástroje pre debugovanie:
+
+- Farebný výpis všetkých dostupných rout (`bin/list-routes.php`)
+- Jednoduchý výpis rout pre shared hosting (`bin/list-routes-simple.php`)
+- Webový výpis rout (`public/debug/routes.php`)
+
+Viac informácií nájdete v [dokumentácii debugovacích nástrojov](docs/debugging.md).
+
+### Testy
+
+Aplikácia obsahuje 39 testov a 105 asercí, ktoré testujú všetky dôležité časti systému:
+
+- Unit testy pre doménové triedy a služby
+- Integračné testy pre repozitáre
+
+Testy môžete spustiť pomocou príkazu `composer test:verbose` alebo `composer test:all`.
+
+Viac informácií nájdete v [dokumentácii testov](docs/testing.md).
