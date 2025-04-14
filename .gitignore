@@ -10,12 +10,21 @@ yarn-error.log
 
 # Vite
 /public/build/
+/public/hot
+.vite/
+node_modules/.vite/
 
 # SQLite
 /data/*.sqlite
+/data/*.sqlite-journal
+/data/*.sqlite-shm
+/data/*.sqlite-wal
 
 # Cache
 /var/cache/
+/var/log/
+/var/sessions/
+/var/tmp/
 
 # IDE
 /.idea/
@@ -28,6 +37,11 @@ Thumbs.db
 # Logs
 /logs/
 *.log
+/var/log/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
 
 # Environment variables
 .env
@@ -38,3 +52,26 @@ Thumbs.db
 /phpunit.xml
 /.phpunit.result.cache
 /coverage/
+/tests/coverage/
+
+# Build files
+/build/
+/dist/
+/build_shared_hosting/
+/build_shared_hosting.zip
+/build_shared_hosting.tar.gz
+
+# Temporary files
+/tmp/
+/temp/
+*.tmp
+*.bak
+*.swp
+
+# Large media files
+*.mp4
+*.tiff
+*.avi
+*.flv
+*.mov
+*.wmv
