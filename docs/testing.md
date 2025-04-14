@@ -34,6 +34,22 @@ V projekte sú k dispozícii nasledujúce príkazy pre spúšťanie testov:
   ```
   Report bude vygenerovaný v adresári `coverage`.
 
+  > **Poznámka**: Pre generovanie coverage reportu je potrebné mať nainštalovaný a nakonfigurovaný Xdebug.
+  > Skript automaticky nastaví `XDEBUG_MODE=coverage`, ale Xdebug musí byť nainštalovaný.
+  >
+  > Inštalácia Xdebug:
+  > ```bash
+  > sudo apt-get install php-xdebug  # Pre Ubuntu/Debian
+  > sudo pecl install xdebug         # Pre ostatné systémy
+  > ```
+  >
+  > Po inštalácii je potrebné pridať nasledujúce riadky do php.ini:
+  > ```ini
+  > [xdebug]
+  > zend_extension=xdebug.so
+  > xdebug.mode=debug,coverage
+  > ```
+
 ### Pokročilé príkazy
 
 - **Spustenie všetkých testov s prehľadným výpisom**:
