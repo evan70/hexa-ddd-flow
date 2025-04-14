@@ -14,12 +14,12 @@
   - [x] Implementovať validáciu vstupných dát
 
 ## 2. Implementácia autentifikácie a autorizácie
-- [ ] Vytvoriť `AuthService` pre správu autentifikácie
-- [ ] Implementovať prihlasovanie a odhlasovanie používateľov
-- [ ] Vytvoriť middleware pre kontrolu autentifikácie
-- [ ] Implementovať autorizáciu na základe rolí používateľov
+- [x] Vytvoriť `AuthService` pre správu autentifikácie
+- [x] Implementovať prihlasovanie a odhlasovanie používateľov
+- [x] Vytvoriť middleware pre kontrolu autentifikácie
+- [x] Implementovať autorizáciu na základe rolí používateľov
 - [ ] Pridať ochranu proti CSRF útokom
-- [ ] Vytvoriť stránky pre prihlásenie a registráciu
+- [x] Vytvoriť stránky pre prihlásenie a registráciu
 
 ## 3. Zlepšenie doménovej vrstvy
 - [ ] Nahradiť triedy s konštantami skutočnými entitami

@@ -6,6 +6,7 @@ use Slim\App;
 use Slim\Routing\RouteCollectorProxy;
 use App\Infrastructure\Controller\UserController;
 use App\Infrastructure\Controller\ArticleController;
+use App\Infrastructure\Controller\AuthController;
 use App\Infrastructure\Middleware\UuidValidatorMiddleware;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
@@ -18,6 +19,11 @@ return function (App $app) {
         $view = $this->get(Twig::class);
         return $view->render($response, 'home.twig');
     });
+
+    // Autentifikácia
+    $app->get('/login', [AuthController::class, 'loginPage']);
+    $app->post('/login', [AuthController::class, 'login']);
+    $app->get('/logout', [AuthController::class, 'logout']);
 
     // Test 404 stránky
     $app->get('/test-404', function (Request $request, Response $response) {

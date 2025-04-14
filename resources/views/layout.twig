@@ -38,6 +38,15 @@
                         <a href="/mark/view/users" class="text-text-light hover:text-primary transition-theme">Používatelia</a>
                     </div>
 
+                    <div class="flex space-x-4">
+                        {% if auth.isLoggedIn() %}
+                            <span class="text-text-light">{{ auth.user.username }}</span>
+                            <a href="/logout" class="text-text-light hover:text-primary transition-theme">Odhlásiť sa</a>
+                        {% else %}
+                            <a href="/login" class="text-text-light hover:text-primary transition-theme">Prihlásiť sa</a>
+                        {% endif %}
+                    </div>
+
                     {# Dark Mode Toggle #}
                     <button
                         id="darkModeToggle"

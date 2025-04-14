@@ -8,12 +8,17 @@ use App\Infrastructure\Helper\ViteAssetHelper;
 use App\Infrastructure\Middleware\UuidValidatorMiddleware;
 use App\Infrastructure\Controller\UserController;
 use App\Infrastructure\Controller\ArticleController;
+use App\Infrastructure\Controller\AuthController;
 use App\Infrastructure\Controller\AbstractController;
 use App\Infrastructure\Twig\UuidExtension;
+use App\Infrastructure\Middleware\AuthMiddleware;
+use App\Infrastructure\Persistence\DatabaseSessionRepository;
 use App\Ports\UserRepositoryInterface;
 use App\Ports\ArticleRepositoryInterface;
+use App\Ports\SessionRepositoryInterface;
 use App\Application\Service\ArticleService;
 use App\Application\Service\UserService;
+use App\Application\Service\AuthService;
 use DI\ContainerBuilder;
 use Psr\Container\ContainerInterface;
 use Slim\Views\Twig;
@@ -77,6 +82,9 @@ return function (ContainerBuilder $containerBuilder) {
 
             // Pridanie ViteAssetHelper do Twig
             $twig->getEnvironment()->addGlobal('vite', $c->get(ViteAssetHelper::class));
+
+            // Pridanie AuthService do Twig
+            $twig->getEnvironment()->addGlobal('auth', $c->get(AuthService::class));
 
             // Pridanie Twig extensions
             $twig->addExtension(new UuidExtension());
@@ -145,6 +153,74 @@ return function (ContainerBuilder $containerBuilder) {
 
         ArticleRepositoryInterface::class => function (ContainerInterface $c) {
             return new DatabaseArticleRepository($c->get('articles_pdo'));
+        },
+
+        'app_pdo' => function (ContainerInterface $c) {
+            $settings = $c->get('settings');
+
+            // Vytvorenie adresára pre databázy, ak neexistuje
+            $dataDir = dirname($settings['database']['app']['path']);
+            if (!is_dir($dataDir)) {
+                mkdir($dataDir, 0777, true);
+            }
+
+            // Vytvorenie PDO inštancie pre app databázu
+            $appPdo = new PDO('sqlite:' . $settings['database']['app']['path']);
+            $appPdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            $appPdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+
+            // Inicializácia app databázy, ak je prázdna
+            $appPdo->exec('
+                CREATE TABLE IF NOT EXISTS sessions (
+                    id TEXT PRIMARY KEY,
+                    user_id TEXT,
+                    data TEXT,
+                    created_at TEXT,
+                    expires_at TEXT
+                )
+            ');
+
+            $appPdo->exec('
+                CREATE TABLE IF NOT EXISTS settings (
+                    key TEXT PRIMARY KEY,
+                    value TEXT,
+                    updated_at TEXT
+                )
+            ');
+
+            // Vytvorenie indexov
+            $appPdo->exec('CREATE INDEX IF NOT EXISTS idx_sessions_user_id ON sessions(user_id)');
+            $appPdo->exec('CREATE INDEX IF NOT EXISTS idx_sessions_expires_at ON sessions(expires_at)');
+
+            return $appPdo;
+        },
+
+        SessionRepositoryInterface::class => function (ContainerInterface $c) {
+            return new DatabaseSessionRepository($c->get('app_pdo'));
+        },
+
+        AuthService::class => function (ContainerInterface $c) {
+            return new AuthService(
+                $c->get(UserRepositoryInterface::class),
+                $c->get(SessionRepositoryInterface::class),
+                'session_id',
+                86400 // 24 hodín
+            );
+        },
+
+        AuthController::class => function (ContainerInterface $c) {
+            return new AuthController(
+                $c->get(AuthService::class),
+                $c->get(Twig::class)
+            );
+        },
+
+        AuthMiddleware::class => function (ContainerInterface $c) {
+            return new AuthMiddleware(
+                $c->get(AuthService::class),
+                [],
+                '/login'
+            );
         }
     ]);
 };
