@@ -9,6 +9,7 @@ use App\Infrastructure\Middleware\UuidValidatorMiddleware;
 use App\Infrastructure\Controller\UserController;
 use App\Infrastructure\Controller\ArticleController;
 use App\Infrastructure\Controller\AuthController;
+use App\Infrastructure\Controller\MarkController;
 use App\Infrastructure\Controller\AbstractController;
 use App\Infrastructure\Twig\UuidExtension;
 use App\Infrastructure\Middleware\AuthMiddleware;
@@ -226,6 +227,15 @@ return function (ContainerBuilder $containerBuilder) {
             return new AuthController(
                 $c->get(AuthService::class),
                 $c->get(CsrfService::class),
+                $c->get(Twig::class)
+            );
+        },
+
+        MarkController::class => function (ContainerInterface $c) {
+            return new MarkController(
+                $c->get(ArticleService::class),
+                $c->get(UserService::class),
+                $c->get(AuthService::class),
                 $c->get(Twig::class)
             );
         },
