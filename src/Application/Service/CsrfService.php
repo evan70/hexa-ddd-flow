@@ -38,35 +38,53 @@ class CsrfService
      * Generuje nový CSRF token a uloží ho do session
      *
      * @param Request $request
-     * @return string|null Vygenerovaný token alebo null, ak používateľ nie je prihlásený
+     * @return string Vygenerovaný token
      */
-    public function generateToken(Request $request): ?string
+    public function generateToken(Request $request): string
     {
         $cookies = $request->getCookieParams();
-        
-        if (!isset($cookies[$this->cookieName])) {
-            return null;
+        $sessionId = null;
+        $sessionData = [];
+
+        // Kontrola, či existuje session cookie
+        if (isset($cookies[$this->cookieName])) {
+            $sessionId = $cookies[$this->cookieName];
+            $session = $this->sessionRepository->get($sessionId);
+
+            if ($session) {
+                $sessionData = $session['data'];
+            } else {
+                // Session ID existuje, ale session nie je v databáze
+                $sessionId = null;
+            }
         }
 
-        $sessionId = $cookies[$this->cookieName];
-        $session = $this->sessionRepository->get($sessionId);
+        // Ak session neexistuje, vytvoríme novú
+        if ($sessionId === null) {
+            $sessionId = bin2hex(random_bytes(16));
 
-        if (!$session) {
-            return null;
+            // Vytvorenie novej session
+            $this->sessionRepository->create($sessionId, null, $sessionData);
+
+            // Vrátime response s cookie
+            $response = $request->getAttribute('response');
+            if ($response) {
+                $response = $response->withHeader('Set-Cookie', $this->cookieName . '=' . $sessionId . '; Path=/; HttpOnly; SameSite=Lax');
+                $request = $request->withAttribute('response', $response);
+            }
         }
 
         // Generovanie náhodného tokenu
         $token = bin2hex(random_bytes(32));
-        
+
         // Uloženie tokenu do session
-        $sessionData = $session['data'];
         $sessionData[$this->tokenName] = [
             'token' => $token,
             'expires' => time() + $this->tokenExpiration
         ];
-        
+
         $this->sessionRepository->update($sessionId, $sessionData);
-        
+
         return $token;
     }
 
@@ -80,7 +98,8 @@ class CsrfService
     public function validateToken(Request $request, string $token): bool
     {
         $cookies = $request->getCookieParams();
-        
+
+        // Ak nie je nastavená cookie, token nie je platný
         if (!isset($cookies[$this->cookieName])) {
             return false;
         }
@@ -88,17 +107,18 @@ class CsrfService
         $sessionId = $cookies[$this->cookieName];
         $session = $this->sessionRepository->get($sessionId);
 
+        // Ak session neexistuje alebo neobsahuje CSRF token, token nie je platný
         if (!$session || !isset($session['data'][$this->tokenName])) {
             return false;
         }
 
         $tokenData = $session['data'][$this->tokenName];
-        
+
         // Kontrola expirácie tokenu
         if (time() > $tokenData['expires']) {
             return false;
         }
-        
+
         // Kontrola tokenu
         return hash_equals($tokenData['token'], $token);
     }
@@ -106,33 +126,57 @@ class CsrfService
     /**
      * Generuje nový CSRF token a uloží ho do session (pre použitie v šablónach)
      *
-     * @return string|null Vygenerovaný token alebo null, ak používateľ nie je prihlásený
+     * @return string Vygenerovaný token
      */
-    public function generate(): ?string
+    public function generate(): string
     {
-        if (!isset($_COOKIE[$this->cookieName])) {
-            return null;
+        $sessionId = null;
+        $sessionData = [];
+
+        // Kontrola, či existuje session cookie
+        if (isset($_COOKIE[$this->cookieName])) {
+            $sessionId = $_COOKIE[$this->cookieName];
+            $session = $this->sessionRepository->get($sessionId);
+
+            if ($session) {
+                $sessionData = $session['data'];
+            } else {
+                // Session ID existuje, ale session nie je v databáze
+                $sessionId = null;
+            }
         }
 
-        $sessionId = $_COOKIE[$this->cookieName];
-        $session = $this->sessionRepository->get($sessionId);
+        // Ak session neexistuje, vytvoríme novú
+        if ($sessionId === null) {
+            $sessionId = bin2hex(random_bytes(16));
 
-        if (!$session) {
-            return null;
+            // Nastavenie cookie
+            setcookie(
+                $this->cookieName,
+                $sessionId,
+                [
+                    'expires' => time() + 86400,
+                    'path' => '/',
+                    'httponly' => true,
+                    'samesite' => 'Lax'
+                ]
+            );
+
+            // Vytvorenie novej session
+            $this->sessionRepository->create($sessionId, null, $sessionData);
         }
 
         // Generovanie náhodného tokenu
         $token = bin2hex(random_bytes(32));
-        
+
         // Uloženie tokenu do session
-        $sessionData = $session['data'];
         $sessionData[$this->tokenName] = [
             'token' => $token,
             'expires' => time() + $this->tokenExpiration
         ];
-        
+
         $this->sessionRepository->update($sessionId, $sessionData);
-        
+
         return $token;
     }
 
@@ -144,6 +188,7 @@ class CsrfService
      */
     public function validate(string $token): bool
     {
+        // Ak nie je nastavená cookie, token nie je platný
         if (!isset($_COOKIE[$this->cookieName])) {
             return false;
         }
@@ -151,17 +196,18 @@ class CsrfService
         $sessionId = $_COOKIE[$this->cookieName];
         $session = $this->sessionRepository->get($sessionId);
 
+        // Ak session neexistuje alebo neobsahuje CSRF token, token nie je platný
         if (!$session || !isset($session['data'][$this->tokenName])) {
             return false;
         }
 
         $tokenData = $session['data'][$this->tokenName];
-        
+
         // Kontrola expirácie tokenu
         if (time() > $tokenData['expires']) {
             return false;
         }
-        
+
         // Kontrola tokenu
         return hash_equals($tokenData['token'], $token);
     }
