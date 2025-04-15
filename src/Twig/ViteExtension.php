@@ -35,8 +35,8 @@ class ViteExtension extends AbstractExtension
     {
         // If dev server is running, return dev server URL
         if ($this->devServerRunning) {
-            // For development, we need to use the public path
-            return $this->publicPathDev . $path;
+            // For development, we need to use the Vite dev server URL
+            return $this->devServerUrl . '/' . $path;
         }
 
         // Load manifest if not already loaded
@@ -62,9 +62,9 @@ class ViteExtension extends AbstractExtension
         if ($this->devServerRunning) {
             return sprintf(
                 '<script type="module" src="%s/@vite/client"></script>' .
-                '<script type="module" src="%s%s"></script>',
+                '<script type="module" src="%s/%s"></script>',
                 $this->devServerUrl,
-                $this->publicPathDev,
+                $this->devServerUrl,
                 $entry
             );
         }
@@ -134,12 +134,18 @@ class ViteExtension extends AbstractExtension
         curl_setopt($ch, CURLOPT_NOBODY, true);
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
         curl_setopt($ch, CURLOPT_TIMEOUT, 1);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_exec($ch);
         $responseCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
 
         // Ak je dev server spustený, vrátime true
         $isRunning = $responseCode >= 200 && $responseCode < 300;
+
+        // Pre vývoj môžeme použiť aj environment premennú
+        if (getenv('VITE_DEV_SERVER') === 'true') {
+            $isRunning = true;
+        }
 
         // Ak je dev server spustený, nastavíme publicPathDev na cestu k dev serveru
         if ($isRunning) {

@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Slim 4 Hexagonal App{% endblock %}</title>
 
-    {# Vite CSS #}
-    <link rel="stylesheet" href="{{ vite_asset('resources/css/app.css') }}">
+    {# Vite CSS a JS #}
+    {{ vite_entry('resources/js/app.js') }}
 
     {# Preload fonty #}
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -103,7 +103,6 @@
         </div>
     </footer>
 
-    {# Vite JS #}
-    <script type="module" src="{{ vite_asset('resources/js/app.js') }}"></script>
+    {# Vite JS je už načítaný cez vite_entry v hlavičke #}
 </body>
 </html>

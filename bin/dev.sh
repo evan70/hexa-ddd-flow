@@ -27,9 +27,9 @@ VITE_PID=$!
 # Počkáme, kým sa Vite dev server spustí
 sleep 2
 
-# Spustenie PHP servera
+# Spustenie PHP servera s environment premennou VITE_DEV_SERVER=true
 echo -e "${GREEN}Spúšťam PHP server...${NC}"
-php -S localhost:8080 -t public &
+VITE_DEV_SERVER=true php -S localhost:8080 -t public &
 PHP_PID=$!
 
 # Výpis informácií
