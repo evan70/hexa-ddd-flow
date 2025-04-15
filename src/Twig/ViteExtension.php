@@ -12,12 +12,13 @@ class ViteExtension extends AbstractExtension
     private $publicPath;
     private $devServerRunning = false;
     private $devServerUrl = 'http://localhost:5173';
+    private $publicPathDev = '/build/';
 
     public function __construct(string $manifestPath = null, string $publicPath = '/build/')
     {
         $this->manifestPath = $manifestPath ?? __DIR__ . '/../../public/build/.vite/manifest.json';
         $this->publicPath = $publicPath;
-        
+
         // Check if dev server is running
         $this->devServerRunning = $this->isDevServerRunning();
     }
@@ -34,7 +35,8 @@ class ViteExtension extends AbstractExtension
     {
         // If dev server is running, return dev server URL
         if ($this->devServerRunning) {
-            return $this->devServerUrl . '/' . $path;
+            // For development, we need to use the public path
+            return $this->publicPathDev . $path;
         }
 
         // Load manifest if not already loaded
@@ -60,9 +62,9 @@ class ViteExtension extends AbstractExtension
         if ($this->devServerRunning) {
             return sprintf(
                 '<script type="module" src="%s/@vite/client"></script>' .
-                '<script type="module" src="%s/%s"></script>',
+                '<script type="module" src="%s%s"></script>',
                 $this->devServerUrl,
-                $this->devServerUrl,
+                $this->publicPathDev,
                 $entry
             );
         }
@@ -122,6 +124,11 @@ class ViteExtension extends AbstractExtension
 
     private function isDevServerRunning(): bool
     {
+        // V produkčnom prostredí nikdy nepoužívame dev server
+        if (getenv('APP_ENV') === 'production') {
+            return false;
+        }
+
         // Check if Vite dev server is running by making a request to the server
         $ch = curl_init($this->devServerUrl . '/@vite/client');
         curl_setopt($ch, CURLOPT_NOBODY, true);
@@ -131,6 +138,15 @@ class ViteExtension extends AbstractExtension
         $responseCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
 
-        return $responseCode >= 200 && $responseCode < 300;
+        // Ak je dev server spustený, vrátime true
+        $isRunning = $responseCode >= 200 && $responseCode < 300;
+
+        // Ak je dev server spustený, nastavíme publicPathDev na cestu k dev serveru
+        if ($isRunning) {
+            // Pre vývoj používame cestu k dev serveru
+            $this->publicPathDev = '/build/';
+        }
+
+        return $isRunning;
     }
 }

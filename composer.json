@@ -22,7 +22,8 @@
     "scripts": {
         "start": "php -S localhost:8080 -t public",
         "init-db": "./bin/init-db.sh",
-        "dev": "./dev.sh",
+        "dev": "./bin/dev.sh",
+        "full": "./bin/dev.sh",
         "build": "pnpm build && php bin/copy-images.php",
         "watch": "pnpm watch",
         "test": "phpunit",
